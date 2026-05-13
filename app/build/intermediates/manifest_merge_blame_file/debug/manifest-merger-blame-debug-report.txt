@@ -1,0 +1,198 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.orthodox.charity"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="26"
+9        android:targetSdkVersion="34" />
+10
+11    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+11-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:4:5-80
+11-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:4:22-78
+12
+13    <queries>
+13-->[SmartSkyPosLib_v1.9.18-SR.2.aar] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\297fa14a754a46214f17a3daa35f4cae\transformed\SmartSkyPosLib_v1.9.18-SR.2\AndroidManifest.xml:7:5-9:15
+14        <package android:name="com.skytech.smartskypos" />
+14-->[SmartSkyPosLib_v1.9.18-SR.2.aar] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\297fa14a754a46214f17a3daa35f4cae\transformed\SmartSkyPosLib_v1.9.18-SR.2\AndroidManifest.xml:8:9-59
+14-->[SmartSkyPosLib_v1.9.18-SR.2.aar] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\297fa14a754a46214f17a3daa35f4cae\transformed\SmartSkyPosLib_v1.9.18-SR.2\AndroidManifest.xml:8:18-56
+15    </queries>
+16
+17    <permission
+17-->[androidx.core:core:1.12.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\f41efb211daceaa856bafe06654da2ba\transformed\core-1.12.0\AndroidManifest.xml:22:5-24:47
+18        android:name="com.orthodox.charity.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+18-->[androidx.core:core:1.12.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\f41efb211daceaa856bafe06654da2ba\transformed\core-1.12.0\AndroidManifest.xml:23:9-81
+19        android:protectionLevel="signature" />
+19-->[androidx.core:core:1.12.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\f41efb211daceaa856bafe06654da2ba\transformed\core-1.12.0\AndroidManifest.xml:24:9-44
+20
+21    <uses-permission android:name="com.orthodox.charity.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+21-->[androidx.core:core:1.12.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\f41efb211daceaa856bafe06654da2ba\transformed\core-1.12.0\AndroidManifest.xml:26:5-97
+21-->[androidx.core:core:1.12.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\f41efb211daceaa856bafe06654da2ba\transformed\core-1.12.0\AndroidManifest.xml:26:22-94
+22
+23    <application
+23-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:6:5-54:19
+24        android:allowBackup="false"
+24-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:7:9-36
+25        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+25-->[androidx.core:core:1.12.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\f41efb211daceaa856bafe06654da2ba\transformed\core-1.12.0\AndroidManifest.xml:28:18-86
+26        android:debuggable="true"
+27        android:extractNativeLibs="false"
+28        android:hardwareAccelerated="true"
+28-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:10:9-43
+29        android:label="Пожертвование"
+29-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:8:9-38
+30        android:persistent="true"
+30-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:11:9-34
+31        android:supportsRtl="true"
+31-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:9:9-35
+32        android:testOnly="true"
+33        android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+33-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:12:9-73
+34        <activity
+34-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:14:9-27:20
+35            android:name="com.orthodox.charity.MainActivity"
+35-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:15:13-41
+36            android:configChanges="orientation|screenSize|keyboardHidden"
+36-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:20:13-74
+37            android:exported="true"
+37-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:16:13-36
+38            android:lockTaskMode="if_whitelisted"
+38-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:18:13-50
+39            android:screenOrientation="portrait"
+39-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:17:13-49
+40            android:windowSoftInputMode="adjustResize" >
+40-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:19:13-55
+41            <intent-filter>
+41-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:21:13-26:29
+42                <action android:name="android.intent.action.MAIN" />
+42-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:22:17-69
+42-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:22:25-66
+43
+44                <category android:name="android.intent.category.LAUNCHER" />
+44-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:23:17-77
+44-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:23:27-74
+45                <category android:name="android.intent.category.HOME" />
+45-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:24:17-73
+45-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:24:27-70
+46                <category android:name="android.intent.category.DEFAULT" />
+46-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:25:17-76
+46-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:25:27-73
+47            </intent-filter>
+48        </activity>
+49
+50        <!-- Boot receiver — starts app on device boot -->
+51        <receiver
+51-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:30:9-39:20
+52            android:name="com.orthodox.charity.BootReceiver"
+52-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:31:13-41
+53            android:enabled="true"
+53-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:33:13-35
+54            android:exported="true" >
+54-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:32:13-36
+55            <intent-filter>
+55-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:34:13-38:29
+56                <action android:name="android.intent.action.BOOT_COMPLETED" />
+56-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:35:17-78
+56-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:35:25-76
+57                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+57-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:36:17-85
+57-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:36:25-83
+58                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+58-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:37:17-81
+58-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:37:25-79
+59            </intent-filter>
+60        </receiver>
+61
+62        <!-- Device admin receiver — required for kiosk lock task mode -->
+63        <receiver
+63-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:42:9-52:20
+64            android:name="com.orthodox.charity.AdminReceiver"
+64-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:43:13-42
+65            android:exported="true"
+65-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:44:13-36
+66            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+66-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:45:13-70
+67            <meta-data
+67-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:46:13-48:55
+68                android:name="android.app.device_admin"
+68-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:47:17-56
+69                android:resource="@xml/device_admin" />
+69-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:48:17-53
+70
+71            <intent-filter>
+71-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:49:13-51:29
+72                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+72-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:50:17-81
+72-->C:\Android Projects\donations\app\src\main\AndroidManifest.xml:50:25-79
+73            </intent-filter>
+74        </receiver>
+75
+76        <provider
+76-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\b495d88f2f726ea99535d4dac22f2e57\transformed\emoji2-1.3.0\AndroidManifest.xml:24:9-32:20
+77            android:name="androidx.startup.InitializationProvider"
+77-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\b495d88f2f726ea99535d4dac22f2e57\transformed\emoji2-1.3.0\AndroidManifest.xml:25:13-67
+78            android:authorities="com.orthodox.charity.androidx-startup"
+78-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\b495d88f2f726ea99535d4dac22f2e57\transformed\emoji2-1.3.0\AndroidManifest.xml:26:13-68
+79            android:exported="false" >
+79-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\b495d88f2f726ea99535d4dac22f2e57\transformed\emoji2-1.3.0\AndroidManifest.xml:27:13-37
+80            <meta-data
+80-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\b495d88f2f726ea99535d4dac22f2e57\transformed\emoji2-1.3.0\AndroidManifest.xml:29:13-31:52
+81                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+81-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\b495d88f2f726ea99535d4dac22f2e57\transformed\emoji2-1.3.0\AndroidManifest.xml:30:17-75
+82                android:value="androidx.startup" />
+82-->[androidx.emoji2:emoji2:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\b495d88f2f726ea99535d4dac22f2e57\transformed\emoji2-1.3.0\AndroidManifest.xml:31:17-49
+83            <meta-data
+83-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\d6cc19db5bf2ac963d8eaa2ec9917450\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:29:13-31:52
+84                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+84-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\d6cc19db5bf2ac963d8eaa2ec9917450\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:30:17-78
+85                android:value="androidx.startup" />
+85-->[androidx.lifecycle:lifecycle-process:2.6.1] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\d6cc19db5bf2ac963d8eaa2ec9917450\transformed\lifecycle-process-2.6.1\AndroidManifest.xml:31:17-49
+86            <meta-data
+86-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:29:13-31:52
+87                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+87-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:30:17-85
+88                android:value="androidx.startup" />
+88-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:31:17-49
+89        </provider>
+90
+91        <receiver
+91-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:34:9-52:20
+92            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+92-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:35:13-76
+93            android:directBootAware="false"
+93-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:36:13-44
+94            android:enabled="true"
+94-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:37:13-35
+95            android:exported="true"
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:38:13-36
+96            android:permission="android.permission.DUMP" >
+96-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:39:13-57
+97            <intent-filter>
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:40:13-42:29
+98                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:17-91
+98-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:41:25-88
+99            </intent-filter>
+100            <intent-filter>
+100-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:43:13-45:29
+101                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:17-85
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:44:25-82
+102            </intent-filter>
+103            <intent-filter>
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:46:13-48:29
+104                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:17-88
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:47:25-85
+105            </intent-filter>
+106            <intent-filter>
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:49:13-51:29
+107                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:17-95
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] C:\Users\Аксёнов Егор\.gradle\caches\transforms-4\c1edb1fc1b894212c2fcf69d95dd268b\transformed\profileinstaller-1.3.0\AndroidManifest.xml:50:25-92
+108            </intent-filter>
+109        </receiver>
+110    </application>
+111
+112</manifest>

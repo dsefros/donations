@@ -69,6 +69,8 @@ import com.skytech.smartskyposlib.TransactionParams
 import com.skytech.smartskyposlib.TransactionResult
 import java.math.BigDecimal
 import kotlinx.coroutines.delay
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 
 private val Ivory = Color(0xFFFCFAF4)
 private val HeaderFooter = Color(0xFFF3EBDD)
@@ -181,12 +183,12 @@ fun OrthodoxCharityApp(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 9.dp, bottom = 9.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    .padding(start = 8.dp, end = 8.dp, top = 0.dp, bottom = 0.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CrossPanel(modifier = Modifier.width(160.dp).fillMaxHeight())
+                CrossPanel(modifier = Modifier.width(130.dp).fillMaxHeight())
                 ButtonsPanel(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier.width(340.dp).fillMaxHeight(),
                     onPayment = onPayment,
                     customAmount = customAmountValue,
                     onAmountChange = onCustomAmountChange
@@ -201,7 +203,7 @@ fun OrthodoxCharityApp(
 @Composable
 fun AppHeader() {
     Column(
-        modifier = Modifier.fillMaxWidth().height(82.dp).background(HeaderFooter).padding(top = 8.dp),
+        modifier = Modifier.fillMaxWidth().height(82.dp).background(Ivory).padding(top = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -211,12 +213,14 @@ fun AppHeader() {
             style = TextStyle(
                 fontFamily = FontFamily.Serif,
                 fontSize = 16.sp,
-                letterSpacing = 2.2.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = GoldDark
             )
         )
-        Text("Помогите ближнему своему", style = TextStyle(fontSize = 12.sp, letterSpacing = 3.sp, color = TextMuted))
+        Spacer(Modifier.height(4.dp))
+
+        Text("Помогите ближнему своему", style = TextStyle(fontSize = 14.sp, color = TextMuted))
+        Spacer(Modifier.height(4.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.width(90.dp).height(0.8.dp).background(ThinLine.copy(alpha = 0.8f)))
             Text(" ✢ ", color = Color(0xFFB79B64), fontSize = 13.sp)
@@ -242,13 +246,6 @@ fun AppFooter() {
             fontFamily = FontFamily.Serif
         )
         Spacer(Modifier.width(8.dp))
-        Text(
-            "Господи, помилуй. Господи, прости. Господи, благослови.",
-            color = TextMuted.copy(alpha = 0.58f),
-            fontSize = 10.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
     }
 }
 
@@ -256,8 +253,11 @@ fun AppFooter() {
 fun CrossPanel(modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            BotanicalBackground(Modifier.fillMaxSize().padding(top = 8.dp))
-            OrthodoxCross(modifier = Modifier.size(width = 108.dp, height = 156.dp))
+            Image(
+                painter = painterResource(id = R.drawable.orthodox_cross_custom),
+                contentDescription = null,
+                modifier = Modifier.size(width = 108.dp, height = 156.dp)
+            )
         }
         Text(
             "«Блажен, кто думает\nо бедном и нищем»",
@@ -270,8 +270,8 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                 lineHeight = 15.sp
             )
         )
-        Text("— Псалом 40:1", style = TextStyle(fontFamily = FontFamily.Serif, color = TextMuted, fontSize = 10.sp))
-        Spacer(Modifier.height(4.dp))
+        Text("— Псалом 40:1", style = TextStyle(fontFamily = FontFamily.Serif, color = TextMuted, fontSize = 12.sp))
+        Spacer(Modifier.height(32.dp))
     }
 }
 
@@ -356,7 +356,7 @@ fun ButtonsPanel(
             clickWholeCard = true,
             onClick = { onPayment(BigDecimal("500.00")) },
             content = {
-                Text("500 ₽", style = TextStyle(fontFamily = FontFamily.Serif, color = TextPrimary, fontSize = 30.sp))
+                Text("500 ₽", style = TextStyle(fontFamily = FontFamily.Serif, color = TextPrimary, fontSize = 24.sp))
             }
         )
         DonationActionCard(
@@ -366,7 +366,7 @@ fun ButtonsPanel(
             clickWholeCard = true,
             onClick = { onPayment(BigDecimal("1000.00")) },
             content = {
-                Text("1 000 ₽", style = TextStyle(fontFamily = FontFamily.Serif, color = TextPrimary, fontSize = 30.sp))
+                Text("1 000 ₽", style = TextStyle(fontFamily = FontFamily.Serif, color = TextPrimary, fontSize = 24.sp))
             }
         )
     }
@@ -383,7 +383,7 @@ fun AmountInput(amount: String, onAmountChange: (String) -> Unit) {
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text("₽", color = TextMuted, fontSize = 18.sp)
+        Text("₽", color = TextMuted, fontSize = 24.sp)
         Spacer(Modifier.width(6.dp))
         BasicTextField(
             value = amount,
@@ -418,7 +418,7 @@ fun DonationActionCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(97.dp)
+            .height(100.dp)
             .scale(scale)
             .border(BorderStroke(1.dp, border), RoundedCornerShape(8.dp))
             .clip(RoundedCornerShape(8.dp))
@@ -429,35 +429,41 @@ fun DonationActionCard(
             )
     ) {
         Column(
-            modifier = Modifier.weight(1f).fillMaxHeight().padding(start = 12.dp, end = 10.dp, top = 10.dp, bottom = 8.dp)
+            modifier = Modifier.weight(1f).fillMaxHeight().padding(start = 8.dp, end = 8.dp, top = 8.dp, bottom = 8.dp)
         ) {
             Text(
                 title,
-                style = TextStyle(fontFamily = FontFamily.Serif, color = GoldDark, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                style = TextStyle(fontFamily = FontFamily.Serif, color = GoldDark, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             )
+            Spacer(Modifier.height(4.dp))
             Text(description, style = TextStyle(color = TextMuted, fontSize = 12.sp), maxLines = 1)
             Spacer(Modifier.weight(1f))
             content()
         }
-        Box(Modifier.width(1.dp).fillMaxHeight().background(CardBorder.copy(alpha = 0.75f)))
         Box(
             modifier = Modifier
-                .width(106.dp)
+                .width(122.dp)
                 .fillMaxHeight()
+                .clip(RoundedCornerShape(8.dp))
                 .background(ActionBrush)
                 .then(
-                    if (!clickWholeCard) Modifier.clickable(interactionSource = actionInteraction, indication = null) { onClick() }
-                    else Modifier
+                    if (!clickWholeCard) {
+                        Modifier.clickable(
+                            interactionSource = actionInteraction,
+                            indication = null
+                        ) { onClick() }
+                    } else {
+                        Modifier
+                    }
                 ),
             contentAlignment = Alignment.Center
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     actionLabel,
-                    style = TextStyle(color = Color.White, fontFamily = FontFamily.Serif, fontSize = if (actionLabel.contains("\n")) 12.sp else 11.sp, textAlign = TextAlign.Center)
+                    style = TextStyle(color = Color.White, fontFamily = FontFamily.Serif, fontSize = if (actionLabel.contains("\n")) 14.sp else 14.sp, textAlign = TextAlign.Center)
                 )
-                Spacer(Modifier.height(2.dp))
-                Text("→", style = TextStyle(color = Color.White, fontSize = 23.sp))
+
             }
         }
     }
@@ -501,8 +507,8 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
         Column(
             modifier = Modifier
                 .scale(scale)
-                .widthIn(max = 290.dp)
-                .background(CardWhite, RoundedCornerShape(10.dp))
+                .widthIn(max = 310.dp)
+                .background(CardWhite, RoundedCornerShape(20.dp))
                 .border(BorderStroke(1.dp, CardBorder), RoundedCornerShape(10.dp))
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally

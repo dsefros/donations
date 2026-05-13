@@ -1,0 +1,26 @@
+[
+    {
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\xml_device_admin.xml.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\xml\\device_admin.xml"
+    },
+    {
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-mdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "com.orthodox.charity.app-merged_res-4:/drawable_orthodox_cross_custom.png.flat",
+        "source": "com.orthodox.charity.app-main-6:/drawable/orthodox_cross_custom.png"
+    },
+    {
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-hdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-xhdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-xxhdpi\\ic_launcher.png"
+    }
+]
