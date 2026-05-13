@@ -9,7 +9,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -51,13 +50,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -256,9 +253,9 @@ fun CrossPanel(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(40.dp))
             ShimmeringCross(modifier = Modifier.size(width = 98.dp, height = 160.dp))
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             Text(
                 text = "«Блажен, кто думает\nо бедном и нищем»",
                 textAlign = TextAlign.Center,
@@ -272,7 +269,7 @@ fun CrossPanel(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.height(3.dp))
             Text(
-                text = "- Псалом 40:1",
+                text = "— Псалом 40:1",
                 style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 11.sp, color = MutedWarm)
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -282,48 +279,58 @@ fun CrossPanel(modifier: Modifier = Modifier) {
 
 @Composable
 private fun TreeBranchesBackground(modifier: Modifier = Modifier) {
-    val branchColor = Gold.copy(alpha = 0.055f)
-    val leafColor = GoldDark.copy(alpha = 0.05f)
-
     Canvas(modifier = modifier) {
+        val branchColor = Gold.copy(alpha = 0.03f)
+        val leafColor = GoldDark.copy(alpha = 0.028f)
         val w = size.width
         val h = size.height
-        val strokeMain = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
-        val strokeSub = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round)
+        val branchStroke = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round)
 
-        drawLine(branchColor, Offset(w * 0.14f, h * 0.83f), Offset(w * 0.38f, h * 0.55f), strokeWidth = strokeMain.width, cap = StrokeCap.Round)
-        drawLine(branchColor, Offset(w * 0.18f, h * 0.72f), Offset(w * 0.44f, h * 0.44f), strokeWidth = strokeSub.width, cap = StrokeCap.Round)
-        drawLine(branchColor, Offset(w * 0.26f, h * 0.66f), Offset(w * 0.53f, h * 0.36f), strokeWidth = strokeSub.width, cap = StrokeCap.Round)
-        drawLine(branchColor, Offset(w * 0.08f, h * 0.62f), Offset(w * 0.30f, h * 0.38f), strokeWidth = strokeSub.width, cap = StrokeCap.Round)
+        val mainBranch = Path().apply {
+            moveTo(w * 0.06f, h * 0.86f)
+            quadraticBezierTo(w * 0.24f, h * 0.70f, w * 0.42f, h * 0.56f)
+        }
+        drawPath(mainBranch, color = branchColor, style = branchStroke)
 
-        drawLine(branchColor, Offset(w * 0.36f, h * 0.56f), Offset(w * 0.48f, h * 0.56f), strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
-        drawLine(branchColor, Offset(w * 0.42f, h * 0.48f), Offset(w * 0.56f, h * 0.48f), strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
-        drawLine(branchColor, Offset(w * 0.48f, h * 0.40f), Offset(w * 0.60f, h * 0.40f), strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
+        val branchA = Path().apply {
+            moveTo(w * 0.16f, h * 0.73f)
+            quadraticBezierTo(w * 0.28f, h * 0.60f, w * 0.44f, h * 0.46f)
+        }
+        drawPath(branchA, color = branchColor, style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round))
 
-        drawCircle(leafColor, radius = 2.4.dp.toPx(), center = Offset(w * 0.49f, h * 0.55f))
-        drawCircle(leafColor, radius = 2.2.dp.toPx(), center = Offset(w * 0.55f, h * 0.47f))
-        drawCircle(leafColor, radius = 2.1.dp.toPx(), center = Offset(w * 0.60f, h * 0.40f))
-        drawCircle(leafColor, radius = 1.8.dp.toPx(), center = Offset(w * 0.32f, h * 0.38f))
+        val branchB = Path().apply {
+            moveTo(w * 0.26f, h * 0.66f)
+            quadraticBezierTo(w * 0.38f, h * 0.53f, w * 0.52f, h * 0.38f)
+        }
+        drawPath(branchB, color = branchColor, style = Stroke(width = 0.9.dp.toPx(), cap = StrokeCap.Round))
+
+        fun leaf(cx: Float, cy: Float, angle: Float, scale: Float) {
+            rotate(degrees = angle, pivot = androidx.compose.ui.geometry.Offset(cx, cy)) {
+                val p = Path().apply {
+                    moveTo(cx, cy)
+                    quadraticBezierTo(cx + 7f * scale, cy - 3f * scale, cx + 2f * scale, cy - 10f * scale)
+                    quadraticBezierTo(cx - 3f * scale, cy - 4f * scale, cx, cy)
+                    close()
+                }
+                drawPath(p, color = leafColor)
+            }
+        }
+
+        leaf(w * 0.42f, h * 0.56f, -10f, 0.8f)
+        leaf(w * 0.45f, h * 0.48f, 20f, 0.75f)
+        leaf(w * 0.52f, h * 0.39f, 5f, 0.7f)
+        leaf(w * 0.34f, h * 0.60f, -20f, 0.65f)
     }
 }
 
 @Composable
 fun ShimmeringCross(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "cross_shimmer")
-    val shimmerShift by transition.animateFloat(
-        initialValue = -1.8f,
-        targetValue = 2.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shift"
-    )
+    val transition = rememberInfiniteTransition(label = "cross_breathe")
     val breatheAlpha by transition.animateFloat(
-        initialValue = 0.97f,
+        initialValue = 0.985f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2600),
+            animation = tween(durationMillis = 3200),
             repeatMode = RepeatMode.Reverse
         ),
         label = "breathe"
@@ -333,28 +340,7 @@ fun ShimmeringCross(modifier: Modifier = Modifier) {
         painter = painterResource(id = R.drawable.orthodox_cross_custom),
         contentDescription = "Православный крест",
         contentScale = ContentScale.Fit,
-        modifier = modifier
-            .graphicsLayer {
-                alpha = breatheAlpha
-                compositingStrategy = CompositingStrategy.Offscreen
-            }
-            .drawWithContent {
-                drawContent()
-                val bandHalfWidth = size.width * 0.16f
-                val x = size.width * shimmerShift
-                drawRect(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.065f),
-                            Color.Transparent
-                        ),
-                        start = Offset(x - bandHalfWidth, size.height),
-                        end = Offset(x + bandHalfWidth, 0f)
-                    ),
-                    blendMode = BlendMode.SrcAtop
-                )
-            }
+        modifier = modifier.graphicsLayer { alpha = breatheAlpha }
     )
 }
 
