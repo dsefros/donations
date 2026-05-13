@@ -18,6 +18,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,6 +58,8 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -243,10 +246,11 @@ fun AppHeader() {
 @Composable
 fun CrossPanel(modifier: Modifier = Modifier) {
     Box(modifier = modifier) {
-        Text(
-            text = "❦",
-            style = TextStyle(fontSize = 210.sp, color = Gold.copy(alpha = 0.045f), fontFamily = FontFamily.Serif),
-            modifier = Modifier.align(Alignment.CenterStart).padding(start = 0.dp)
+        TreeBranchesBackground(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(120.dp)
+                .align(Alignment.CenterStart)
         )
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -273,6 +277,33 @@ fun CrossPanel(modifier: Modifier = Modifier) {
             )
             Spacer(modifier = Modifier.weight(1f))
         }
+    }
+}
+
+@Composable
+private fun TreeBranchesBackground(modifier: Modifier = Modifier) {
+    val branchColor = Gold.copy(alpha = 0.055f)
+    val leafColor = GoldDark.copy(alpha = 0.05f)
+
+    Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+        val strokeMain = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round)
+        val strokeSub = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round)
+
+        drawLine(branchColor, Offset(w * 0.14f, h * 0.83f), Offset(w * 0.38f, h * 0.55f), strokeWidth = strokeMain.width, cap = StrokeCap.Round)
+        drawLine(branchColor, Offset(w * 0.18f, h * 0.72f), Offset(w * 0.44f, h * 0.44f), strokeWidth = strokeSub.width, cap = StrokeCap.Round)
+        drawLine(branchColor, Offset(w * 0.26f, h * 0.66f), Offset(w * 0.53f, h * 0.36f), strokeWidth = strokeSub.width, cap = StrokeCap.Round)
+        drawLine(branchColor, Offset(w * 0.08f, h * 0.62f), Offset(w * 0.30f, h * 0.38f), strokeWidth = strokeSub.width, cap = StrokeCap.Round)
+
+        drawLine(branchColor, Offset(w * 0.36f, h * 0.56f), Offset(w * 0.48f, h * 0.56f), strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
+        drawLine(branchColor, Offset(w * 0.42f, h * 0.48f), Offset(w * 0.56f, h * 0.48f), strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
+        drawLine(branchColor, Offset(w * 0.48f, h * 0.40f), Offset(w * 0.60f, h * 0.40f), strokeWidth = 1.dp.toPx(), cap = StrokeCap.Round)
+
+        drawCircle(leafColor, radius = 2.4.dp.toPx(), center = Offset(w * 0.49f, h * 0.55f))
+        drawCircle(leafColor, radius = 2.2.dp.toPx(), center = Offset(w * 0.55f, h * 0.47f))
+        drawCircle(leafColor, radius = 2.1.dp.toPx(), center = Offset(w * 0.60f, h * 0.40f))
+        drawCircle(leafColor, radius = 1.8.dp.toPx(), center = Offset(w * 0.32f, h * 0.38f))
     }
 }
 
