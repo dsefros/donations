@@ -1,5 +1,6 @@
 R_DEF: Internal format may change without notice
 local
+drawable app_header_divider
 drawable orthodox_cross_custom
 font alegreya_bold
 font alegreya_italic

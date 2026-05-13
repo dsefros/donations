@@ -53,9 +53,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -64,9 +64,9 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skytech.smartskyposlib.Constants
@@ -82,7 +82,13 @@ private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
 private val FooterBar = Color(0xFF9A7B3E)
-private val ActionBrush = Brush.horizontalGradient(listOf(Color(0xFF9D7C3D), Color(0xFFB99653)))
+
+private val ActionBrush = Brush.horizontalGradient(
+    listOf(
+        Color(0xFF9D7C3D),
+        Color(0xFFB99653)
+    )
+)
 
 private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_regular, FontWeight.Normal),
@@ -91,7 +97,6 @@ private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_semibold, FontWeight.SemiBold),
     Font(R.font.alegreya_bold, FontWeight.Bold)
 )
-
 
 fun buildPaymentIntent(amount: BigDecimal): Intent =
     Intent("com.skytech.smartskypos.PAYMENT").apply {
@@ -106,28 +111,33 @@ sealed class PaymentResult {
 }
 
 class MainActivity : ComponentActivity() {
+
     private val paymentResult = mutableStateOf<PaymentResult?>(null)
     private val customAmount = mutableStateOf("2000")
 
     private val posLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult -> handlePaymentResult(result) }
+    ) { result: ActivityResult ->
+        handlePaymentResult(result)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
+
         @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            )
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                )
 
         setContent {
             OrthodoxCharityApp(
@@ -142,28 +152,32 @@ class MainActivity : ComponentActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
+
         if (hasFocus) {
             @Suppress("DEPRECATION")
             window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                    View.SYSTEM_UI_FLAG_FULLSCREEN or
-                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                )
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                            View.SYSTEM_UI_FLAG_FULLSCREEN or
+                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    )
         }
     }
 
     @Deprecated("Disabled")
-    override fun onBackPressed() {}
+    override fun onBackPressed() = Unit
 
     private fun handlePaymentResult(result: ActivityResult) {
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
             paymentResult.value = PaymentResult.Error("Оплата отменена или терминал недоступен")
             return
         }
-        val tx: TransactionResult? = result.data!!.getParcelableExtra(Constants.TRANSACTION_RESULT_KEY)
+
+        val tx: TransactionResult? =
+            result.data?.getParcelableExtra(Constants.TRANSACTION_RESULT_KEY)
+
         if (tx == null) {
             paymentResult.value = PaymentResult.Error("Нет данных о транзакции")
             return
@@ -172,11 +186,13 @@ class MainActivity : ComponentActivity() {
         val code = tx.code
         val message = tx.message ?: ""
         val rc = tx.rc ?: ""
+
         paymentResult.value = if (code == 0 && rc == "00") {
             PaymentResult.Success(message = message, rc = rc)
         } else {
             PaymentResult.Declined(code = code, message = message, rc = rc)
         }
+
         customAmount.value = "2000"
     }
 }
@@ -189,9 +205,14 @@ fun OrthodoxCharityApp(
     customAmountValue: String,
     onCustomAmountChange: (String) -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize().background(BgMain)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BgMain)
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader()
+
             Row(
                 modifier = Modifier
                     .weight(1f)
@@ -199,25 +220,40 @@ fun OrthodoxCharityApp(
                     .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                CrossPanel(modifier = Modifier.width(130.dp).fillMaxHeight())
+                CrossPanel(
+                    modifier = Modifier
+                        .width(130.dp)
+                        .fillMaxHeight()
+                )
+
                 ButtonsPanel(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     customAmount = customAmountValue,
                     onAmountChange = onCustomAmountChange,
                     onPayment = onPayment
                 )
             }
+
             AppFooter()
         }
 
-        paymentResult?.let { PaymentResultDialog(result = it, onDismiss = onClearResult) }
+        paymentResult?.let {
+            PaymentResultDialog(
+                result = it,
+                onDismiss = onClearResult
+            )
+        }
     }
 }
 
 @Composable
 fun AppHeader() {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 7.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp, bottom = 7.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -230,7 +266,9 @@ fun AppHeader() {
                 color = GoldDark
             )
         )
+
         Spacer(modifier = Modifier.height(3.dp))
+
         Text(
             text = "Помогите ближнему своему",
             style = TextStyle(
@@ -240,12 +278,17 @@ fun AppHeader() {
                 color = MutedWarm
             )
         )
+
         Spacer(modifier = Modifier.height(6.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(modifier = Modifier.width(76.dp).height(1.dp).background(BorderGold))
-            Text(" ✢ ", style = TextStyle(fontSize = 12.sp, color = BorderGold))
-            Box(modifier = Modifier.width(76.dp).height(1.dp).background(BorderGold))
-        }
+
+        Image(
+            painter = painterResource(id = R.drawable.app_header_divider),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .width(170.dp)
+                .height(16.dp)
+        )
     }
 }
 
@@ -258,13 +301,19 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                 .width(120.dp)
                 .align(Alignment.CenterStart)
         )
+
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(40.dp))
-            ShimmeringCross(modifier = Modifier.size(width = 98.dp, height = 160.dp))
+
+            ShimmeringCross(
+                modifier = Modifier.size(width = 98.dp, height = 160.dp)
+            )
+
             Spacer(modifier = Modifier.height(18.dp))
+
             Text(
                 text = "«Блажен, кто думает\nо бедном и нищем»",
                 textAlign = TextAlign.Center,
@@ -276,11 +325,18 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                     lineHeight = 15.sp
                 )
             )
+
             Spacer(modifier = Modifier.height(3.dp))
+
             Text(
                 text = "— Псалом 40:1",
-                style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 11.sp,
+                    color = MutedWarm
+                )
             )
+
             Spacer(modifier = Modifier.weight(1f))
         }
     }
@@ -291,37 +347,81 @@ private fun TreeBranchesBackground(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
         val branchColor = Gold.copy(alpha = 0.055f)
         val leafColor = GoldDark.copy(alpha = 0.045f)
+
         val w = size.width
         val h = size.height
-        val branchStroke = Stroke(width = 1.35.dp.toPx(), cap = StrokeCap.Round)
 
         val mainBranch = Path().apply {
             moveTo(w * 0.06f, h * 0.86f)
-            quadraticBezierTo(w * 0.24f, h * 0.70f, w * 0.42f, h * 0.56f)
+            quadraticBezierTo(
+                w * 0.24f,
+                h * 0.70f,
+                w * 0.42f,
+                h * 0.56f
+            )
         }
-        drawPath(mainBranch, color = branchColor, style = branchStroke)
+
+        drawPath(
+            path = mainBranch,
+            color = branchColor,
+            style = Stroke(width = 1.35.dp.toPx(), cap = StrokeCap.Round)
+        )
 
         val branchA = Path().apply {
             moveTo(w * 0.16f, h * 0.73f)
-            quadraticBezierTo(w * 0.28f, h * 0.60f, w * 0.44f, h * 0.46f)
+            quadraticBezierTo(
+                w * 0.28f,
+                h * 0.60f,
+                w * 0.44f,
+                h * 0.46f
+            )
         }
-        drawPath(branchA, color = branchColor, style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round))
+
+        drawPath(
+            path = branchA,
+            color = branchColor,
+            style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
+        )
 
         val branchB = Path().apply {
             moveTo(w * 0.26f, h * 0.66f)
-            quadraticBezierTo(w * 0.38f, h * 0.53f, w * 0.52f, h * 0.38f)
+            quadraticBezierTo(
+                w * 0.38f,
+                h * 0.53f,
+                w * 0.52f,
+                h * 0.38f
+            )
         }
-        drawPath(branchB, color = branchColor, style = Stroke(width = 1.0.dp.toPx(), cap = StrokeCap.Round))
+
+        drawPath(
+            path = branchB,
+            color = branchColor,
+            style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
+        )
 
         fun leaf(cx: Float, cy: Float, angle: Float, scale: Float) {
-            rotate(degrees = angle, pivot = androidx.compose.ui.geometry.Offset(cx, cy)) {
+            rotate(
+                degrees = angle,
+                pivot = androidx.compose.ui.geometry.Offset(cx, cy)
+            ) {
                 val p = Path().apply {
                     moveTo(cx, cy)
-                    quadraticBezierTo(cx + 7f * scale, cy - 3f * scale, cx + 2f * scale, cy - 10f * scale)
-                    quadraticBezierTo(cx - 3f * scale, cy - 4f * scale, cx, cy)
+                    quadraticBezierTo(
+                        cx + 7f * scale,
+                        cy - 3f * scale,
+                        cx + 2f * scale,
+                        cy - 10f * scale
+                    )
+                    quadraticBezierTo(
+                        cx - 3f * scale,
+                        cy - 4f * scale,
+                        cx,
+                        cy
+                    )
                     close()
                 }
-                drawPath(p, color = leafColor)
+
+                drawPath(path = p, color = leafColor)
             }
         }
 
@@ -335,6 +435,7 @@ private fun TreeBranchesBackground(modifier: Modifier = Modifier) {
 @Composable
 fun ShimmeringCross(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "cross_breathe")
+
     val breatheAlpha by transition.animateFloat(
         initialValue = 0.985f,
         targetValue = 1f,
@@ -349,7 +450,9 @@ fun ShimmeringCross(modifier: Modifier = Modifier) {
         painter = painterResource(id = R.drawable.orthodox_cross_custom),
         contentDescription = "Православный крест",
         contentScale = ContentScale.Fit,
-        modifier = modifier.graphicsLayer { alpha = breatheAlpha }
+        modifier = modifier.graphicsLayer {
+            alpha = breatheAlpha
+        }
     )
 }
 
@@ -360,7 +463,10 @@ fun ButtonsPanel(
     onAmountChange: (String) -> Unit,
     onPayment: (BigDecimal) -> Unit
 ) {
-    Column(modifier = modifier.padding(top = 2.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = modifier.padding(top = 2.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         DonationActionCard(
             title = "СВОЯ СУММА",
             description = "Введите любую сумму",
@@ -368,9 +474,21 @@ fun ButtonsPanel(
             clickWholeCard = false,
             onClick = {
                 val parsed = customAmount.toBigDecimalOrNull()
-                if (parsed != null && parsed > BigDecimal.ZERO) onPayment(parsed)
+                if (parsed != null && parsed > BigDecimal.ZERO) {
+                    onPayment(parsed)
+                }
             },
-            content = { AmountInput(value = customAmount, onValueChange = onAmountChange) }
+            content = {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AmountInput(
+                        value = customAmount,
+                        onValueChange = onAmountChange
+                    )
+                }
+            }
         )
 
         DonationActionCard(
@@ -382,7 +500,14 @@ fun ButtonsPanel(
             content = {
                 Text(
                     text = "500 ₽",
-                    style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 30.sp, color = TextMain, fontWeight = FontWeight.SemiBold)
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontFamily = AlegreyaFontFamily,
+                        fontSize = 30.sp,
+                        color = TextMain,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
             }
         )
@@ -396,7 +521,14 @@ fun ButtonsPanel(
             content = {
                 Text(
                     text = "1000 ₽",
-                    style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 30.sp, color = TextMain, fontWeight = FontWeight.SemiBold)
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontFamily = AlegreyaFontFamily,
+                        fontSize = 30.sp,
+                        color = TextMain,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
             }
         )
@@ -414,6 +546,7 @@ fun DonationActionCard(
 ) {
     val interaction = remember { MutableInteractionSource() }
     val isPressed by interaction.collectIsPressedAsState()
+
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.985f else 1f,
         animationSpec = spring(stiffness = 700f),
@@ -421,8 +554,14 @@ fun DonationActionCard(
     )
 
     val cardClickModifier = if (clickWholeCard) {
-        Modifier.clickable(interactionSource = interaction, indication = null, onClick = onClick)
-    } else Modifier
+        Modifier.clickable(
+            interactionSource = interaction,
+            indication = null,
+            onClick = onClick
+        )
+    } else {
+        Modifier
+    }
 
     Row(
         modifier = Modifier
@@ -435,7 +574,10 @@ fun DonationActionCard(
             .then(cardClickModifier)
     ) {
         Column(
-            modifier = Modifier.weight(1f).fillMaxHeight().padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
@@ -448,16 +590,22 @@ fun DonationActionCard(
                         color = GoldDark
                     )
                 )
+
                 Text(
                     text = description,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
+                    style = TextStyle(
+                        fontFamily = AlegreyaFontFamily,
+                        fontSize = 11.sp,
+                        color = MutedWarm
+                    )
                 )
             }
+
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.CenterStart
             ) {
                 content()
             }
@@ -465,17 +613,24 @@ fun DonationActionCard(
 
         val actionInteraction = remember { MutableInteractionSource() }
         val actionPressed by actionInteraction.collectIsPressedAsState()
-        val actionScale by animateFloatAsState(if (actionPressed) 0.985f else 1f, label = "action_scale")
+
+        val actionScale by animateFloatAsState(
+            targetValue = if (actionPressed) 0.985f else 1f,
+            label = "action_scale"
+        )
 
         Box(
             modifier = Modifier
-                .padding(2.dp)
                 .width(110.dp)
                 .fillMaxHeight()
                 .scale(actionScale)
                 .clip(RoundedCornerShape(10.dp))
                 .background(ActionBrush)
-                .clickable(interactionSource = actionInteraction, indication = null, onClick = onClick),
+                .clickable(
+                    interactionSource = actionInteraction,
+                    indication = null,
+                    onClick = onClick
+                ),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -495,7 +650,10 @@ fun DonationActionCard(
 }
 
 @Composable
-fun AmountInput(value: String, onValueChange: (String) -> Unit) {
+fun AmountInput(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
     val amountTextStyle = TextStyle(
         fontFamily = AlegreyaFontFamily,
         fontSize = 30.sp,
@@ -506,7 +664,7 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
 
     Box(
         modifier = Modifier
-            .width(132.dp)
+            .width(172.dp)
             .height(42.dp)
             .clip(RoundedCornerShape(7.dp))
             .border(
@@ -524,9 +682,9 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
         ) {
             BasicTextField(
                 value = value,
-                onValueChange = {
-                    if (it.all(Char::isDigit) && it.length <= 8) {
-                        onValueChange(it)
+                onValueChange = { input ->
+                    if (input.all(Char::isDigit) && input.length <= 8) {
+                        onValueChange(input)
                     }
                 },
                 singleLine = true,
@@ -546,6 +704,7 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
                                 )
                             )
                         }
+
                         innerTextField()
                     }
                 }
@@ -564,39 +723,87 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
 @Composable
 fun AppFooter() {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(BorderGold))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(BorderGold)
+        )
+
         Row(
-            modifier = Modifier.fillMaxWidth().background(FooterBar).padding(horizontal = 14.dp, vertical = 10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(FooterBar)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("☦", style = TextStyle(color = Color.White, fontFamily = AlegreyaFontFamily, fontSize = 14.sp))
-            Spacer(modifier = Modifier.width(7.dp))
             Text(
-                "МОЛИТВА",
-                style = TextStyle(color = Color.White, fontFamily = AlegreyaFontFamily, fontSize = 12.sp, letterSpacing = 0.8.sp)
+                text = "☦",
+                style = TextStyle(
+                    color = Color.White,
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 14.sp
+                )
+            )
+
+            Spacer(modifier = Modifier.width(7.dp))
+
+            Text(
+                text = "МОЛИТВА",
+                style = TextStyle(
+                    color = Color.White,
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 12.sp,
+                    letterSpacing = 0.8.sp
+                )
             )
         }
     }
 }
 
 @Composable
-fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
+fun PaymentResultDialog(
+    result: PaymentResult,
+    onDismiss: () -> Unit
+) {
     LaunchedEffect(result) {
         delay(10_000)
         onDismiss()
     }
 
     val dialogUi = when (result) {
-        is PaymentResult.Success -> DialogUi("☩", "ОПЛАТА ПРИНЯТА", "Код ответа: ${result.rc}", "А М И Н Ь")
-        is PaymentResult.Declined -> DialogUi("✕", "ОТКЛОНЕНО", "RC: ${result.rc} • Код: ${result.code}", "ЗАКРЫТЬ")
-        is PaymentResult.Error -> DialogUi("!", "ОШИБКА", result.reason, "ЗАКРЫТЬ")
+        is PaymentResult.Success -> DialogUi(
+            icon = "☩",
+            title = "ОПЛАТА ПРИНЯТА",
+            subtitle = "Код ответа: ${result.rc}",
+            buttonLabel = "А М И Н Ь"
+        )
+
+        is PaymentResult.Declined -> DialogUi(
+            icon = "✕",
+            title = "ОТКЛОНЕНО",
+            subtitle = "RC: ${result.rc} • Код: ${result.code}",
+            buttonLabel = "ЗАКРЫТЬ"
+        )
+
+        is PaymentResult.Error -> DialogUi(
+            icon = "!",
+            title = "ОШИБКА",
+            subtitle = result.reason,
+            buttonLabel = "ЗАКРЫТЬ"
+        )
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black.copy(alpha = 0.26f))
-            .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) { onDismiss() },
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) {
+                onDismiss()
+            },
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -605,33 +812,69 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White)
                 .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
-                .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {},
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {},
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(18.dp))
-            Text(dialogUi.icon, style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 28.sp, color = GoldDark))
+
+            Text(
+                text = dialogUi.icon,
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 28.sp,
+                    color = GoldDark
+                )
+            )
+
             Spacer(modifier = Modifier.height(6.dp))
-            Text(dialogUi.title, style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 16.sp, color = GoldDark, fontWeight = FontWeight.SemiBold))
+
+            Text(
+                text = dialogUi.title,
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 16.sp,
+                    color = GoldDark,
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+
             Spacer(modifier = Modifier.height(6.dp))
+
             val message = when (result) {
                 is PaymentResult.Success -> result.message
                 is PaymentResult.Declined -> result.message
                 is PaymentResult.Error -> result.reason
             }
+
             Text(
                 text = message,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp),
-                style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 14.sp, color = TextMain)
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 14.sp,
+                    color = TextMain
+                )
             )
+
             Spacer(modifier = Modifier.height(4.dp))
+
             Text(
                 text = dialogUi.subtitle,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp),
-                style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 11.sp,
+                    color = MutedWarm
+                )
             )
+
             Spacer(modifier = Modifier.height(14.dp))
+
             Box(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -642,8 +885,17 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
                     .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(dialogUi.buttonLabel, style = TextStyle(color = Color.White, fontFamily = AlegreyaFontFamily, fontSize = 13.sp, letterSpacing = 1.sp))
+                Text(
+                    text = dialogUi.buttonLabel,
+                    style = TextStyle(
+                        color = Color.White,
+                        fontFamily = AlegreyaFontFamily,
+                        fontSize = 13.sp,
+                        letterSpacing = 1.sp
+                    )
+                )
             }
+
             Spacer(modifier = Modifier.height(16.dp))
         }
     }

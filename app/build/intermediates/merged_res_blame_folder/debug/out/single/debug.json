@@ -1,46 +1,50 @@
 [
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/font_alegreya_semibold.ttf.flat",
-        "source": "com.orthodox.charity.app-main-6:/font/alegreya_semibold.ttf"
+        "merged": "com.orthodox.charity.app-merged_res-4:/drawable_app_header_divider.png.flat",
+        "source": "com.orthodox.charity.app-main-6:/drawable/app_header_divider.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/font_alegreya_regular.ttf.flat",
-        "source": "com.orthodox.charity.app-main-6:/font/alegreya_regular.ttf"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\font_alegreya_bold.ttf.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\font\\alegreya_bold.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/font_alegreya_medium.ttf.flat",
-        "source": "com.orthodox.charity.app-main-6:/font/alegreya_medium.ttf"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\font_alegreya_regular.ttf.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\font\\alegreya_regular.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/xml_device_admin.xml.flat",
-        "source": "com.orthodox.charity.app-main-6:/xml/device_admin.xml"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\font_alegreya_semibold.ttf.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\font\\alegreya_semibold.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/font_alegreya_italic.ttf.flat",
-        "source": "com.orthodox.charity.app-main-6:/font/alegreya_italic.ttf"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\font_alegreya_medium.ttf.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\font\\alegreya_medium.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/mipmap-mdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-6:/mipmap-mdpi/ic_launcher.png"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-hdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/drawable_orthodox_cross_custom.png.flat",
-        "source": "com.orthodox.charity.app-main-6:/drawable/orthodox_cross_custom.png"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\drawable_orthodox_cross_custom.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\drawable\\orthodox_cross_custom.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/font_alegreya_bold.ttf.flat",
-        "source": "com.orthodox.charity.app-main-6:/font/alegreya_bold.ttf"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\font_alegreya_italic.ttf.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\font\\alegreya_italic.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/mipmap-xhdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-6:/mipmap-xhdpi/ic_launcher.png"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-xxhdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/mipmap-hdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-6:/mipmap-hdpi/ic_launcher.png"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\xml_device_admin.xml.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\xml\\device_admin.xml"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-4:/mipmap-xxhdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-6:/mipmap-xxhdpi/ic_launcher.png"
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-mdpi\\ic_launcher.png"
+    },
+    {
+        "merged": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-4:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\Аксёнов Егор\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-6:\\mipmap-xhdpi\\ic_launcher.png"
     }
 ]
