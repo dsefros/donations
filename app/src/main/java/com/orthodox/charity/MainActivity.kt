@@ -604,7 +604,7 @@ fun DonationActionCard(
                     style = TextStyle(
                         fontFamily = AlegreyaFontFamily,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 17.sp,
+                        fontSize = 16.sp,
                         color = GoldDark
                     )
                 )
@@ -615,7 +615,7 @@ fun DonationActionCard(
                     overflow = TextOverflow.Ellipsis,
                     style = TextStyle(
                         fontFamily = AlegreyaFontFamily,
-                        fontSize = 11.sp,
+                        fontSize = 12.sp,
                         color = MutedWarm
                     )
                 )
@@ -639,7 +639,7 @@ fun DonationActionCard(
 
         Box(
             modifier = Modifier
-                .width(110.dp)
+                .width(120.dp)
                 .fillMaxHeight()
                 .scale(actionScale)
                 .clip(RoundedCornerShape(10.dp))
@@ -657,7 +657,7 @@ fun DonationActionCard(
                 maxLines = 2,
                 style = TextStyle(
                     fontFamily = AlegreyaFontFamily,
-                    fontSize = if (actionLabel.contains("\n")) 12.sp else 11.sp,
+                    fontSize = if (actionLabel.contains("\n")) 14.sp else 14.sp,
                     lineHeight = 14.sp,
                     letterSpacing = 0.1.sp,
                     color = Color.White
