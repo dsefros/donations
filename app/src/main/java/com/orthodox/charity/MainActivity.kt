@@ -95,6 +95,10 @@ private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_bold, FontWeight.Bold)
 )
 
+private val TimesNewRomanFontFamily = FontFamily(
+    Font(R.font.times_new_roman_regular, FontWeight.Normal)
+)
+
 fun buildPaymentIntent(context: Context, amount: BigDecimal): Intent =
     Intent(context, SkyPaymentActivityV2::class.java).apply {
         putExtra(PaymentActivity.PARAMS_KEY, TransactionParams(amount))
@@ -224,16 +228,37 @@ fun OrthodoxCharityApp(
             .background(BgMain)
     ) {
         Image(
+            painter = painterResource(id = R.drawable.my_background),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Image(
             painter = painterResource(id = R.drawable.cross_background),
             contentDescription = null,
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .offset(x = (-85).dp, y = 8.dp)
-                .width(300.dp)
-                .height(340.dp)
+                .offset(x = (-66).dp, y = (-44).dp)
+                .width(280.dp)
+                .height(320.dp)
                 .graphicsLayer {
-                    alpha = 0.90f
+                    alpha = 1f
+                }
+        )
+
+        Image(
+            painter = painterResource(id = R.drawable.cross_glow_background),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset(x = (-4).dp, y = (-56).dp)
+                .width(150.dp)
+                .height(250.dp)
+                .graphicsLayer {
+                    alpha = 0.85f
                 }
         )
 
@@ -328,8 +353,25 @@ fun AppOrnamentDivider(
         contentDescription = null,
         contentScale = ContentScale.Fit,
         modifier = modifier
-            .width(170.dp)
-            .height(16.dp)
+            .width(232.dp)
+            .height(24.dp)
+    )
+}
+
+@Composable
+fun CardOrnamentDivider(
+    modifier: Modifier = Modifier
+) {
+    Image(
+        painter = painterResource(id = R.drawable.card_divider),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+            .width(160.dp)
+            .height(14.dp)
+            .graphicsLayer {
+                alpha = 0.92f
+            }
     )
 }
 
@@ -343,13 +385,13 @@ fun CrossPanel(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(72.dp))
 
             ShimmeringCross(
                 modifier = Modifier.size(width = 98.dp, height = 160.dp)
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(56.dp))
 
             Text(
                 text = "«Блажен, кто думает\nо бедном и нищем»",
@@ -358,18 +400,18 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                     fontFamily = AlegreyaFontFamily,
                     fontStyle = FontStyle.Italic,
                     color = GoldDark,
-                    fontSize = 10.sp,
+                    fontSize = 12.sp,
                     lineHeight = 15.sp
                 )
             )
 
-            Spacer(modifier = Modifier.height(3.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "— Псалом 40:1",
                 style = TextStyle(
                     fontFamily = AlegreyaFontFamily,
-                    fontSize = 11.sp,
+                    fontSize = 12.sp,
                     color = MutedWarm
                 )
             )
@@ -417,6 +459,7 @@ fun ButtonsPanel(
             title = "СВОЯ СУММА",
             description = "Введите любую сумму",
             actionLabel = "ВНЕСТИ ЛЕПТУ",
+            showCardDivider = false,
             clickWholeCard = false,
             onClick = {
                 val parsed = customAmount.toBigDecimalOrNull()
@@ -443,6 +486,7 @@ fun ButtonsPanel(
             title = "ПОМОЩЬ ХРАМУ",
             description = "Восстановление и нужды церкви",
             actionLabel = "ПОЖЕРТВОВАТЬ",
+            showCardDivider = true,
             clickWholeCard = true,
             onClick = { onPayment(BigDecimal("500.00")) },
             content = {
@@ -451,10 +495,10 @@ fun ButtonsPanel(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
+                        fontFamily = TimesNewRomanFontFamily,
                         fontSize = 30.sp,
                         color = TextMain,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Normal
                     )
                 )
             }
@@ -466,6 +510,7 @@ fun ButtonsPanel(
             title = "ДЕТСКИЙ ПРИЮТ",
             description = "Забота о сиротах и детях",
             actionLabel = "ПОЖЕРТВОВАТЬ",
+            showCardDivider = true,
             clickWholeCard = true,
             onClick = { onPayment(BigDecimal("1000.00")) },
             content = {
@@ -474,10 +519,10 @@ fun ButtonsPanel(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
+                        fontFamily = TimesNewRomanFontFamily,
                         fontSize = 30.sp,
                         color = TextMain,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Normal
                     )
                 )
             }
@@ -490,6 +535,7 @@ fun DonationActionCard(
     title: String,
     description: String,
     actionLabel: String,
+    showCardDivider: Boolean = false,
     clickWholeCard: Boolean,
     onClick: () -> Unit,
     content: @Composable () -> Unit
@@ -516,10 +562,9 @@ fun DonationActionCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(108.dp)
             .scale(scale)
             .clip(RoundedCornerShape(11.dp))
-            .background(BgMain.copy(alpha = 0.75f))
             .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(11.dp))
             .then(cardClickModifier)
     ) {
@@ -527,8 +572,7 @@ fun DonationActionCard(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
         ) {
             Column {
                 Text(
@@ -553,9 +597,28 @@ fun DonationActionCard(
                 )
             }
 
+            if (showCardDivider) {
+                Spacer(modifier = Modifier.height(3.dp))
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CardOrnamentDivider(
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(12.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(1.dp))
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
             Box(
                 modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.Center
             ) {
                 content()
             }
@@ -573,9 +636,9 @@ fun DonationActionCard(
             modifier = Modifier
                 .width(120.dp)
                 .fillMaxHeight()
+                .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
                 .scale(actionScale)
                 .clip(RoundedCornerShape(10.dp))
-                .background(ActionBrush)
                 .clickable(
                     interactionSource = actionInteraction,
                     indication = null,
@@ -583,6 +646,13 @@ fun DonationActionCard(
                 ),
             contentAlignment = Alignment.Center
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.button_bg),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
             Text(
                 text = actionLabel,
                 textAlign = TextAlign.Center,
@@ -591,8 +661,8 @@ fun DonationActionCard(
                     fontFamily = AlegreyaFontFamily,
                     fontSize = 14.sp,
                     lineHeight = 14.sp,
-                    letterSpacing = 0.1.sp,
-                    color = Color.White
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
                 )
             )
         }
@@ -605,9 +675,9 @@ fun AmountInput(
     onValueChange: (String) -> Unit
 ) {
     val amountTextStyle = TextStyle(
-        fontFamily = AlegreyaFontFamily,
+        fontFamily = TimesNewRomanFontFamily,
         fontSize = 30.sp,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.Normal,
         color = TextMain,
         textAlign = TextAlign.Center
     )
@@ -621,7 +691,6 @@ fun AmountInput(
                 BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
                 RoundedCornerShape(7.dp)
             )
-            .background(BgMain.copy(alpha = 0.75f))
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -683,14 +752,14 @@ fun PaymentResultDialog(
     val dialogUi = when (result) {
         is PaymentResult.Success -> DialogUi(
             icon = "☩",
-            title = "ОПЛАТА ПРИНЯТА",
+            title = "ПОЖЕРТВОВАНИЕ ПРИНЯТО",
             message = "Спасибо за ваше пожертвование",
-            buttonLabel = "А М И Н Ь"
+            buttonLabel = "ЗАКРЫТЬ"
         )
 
         is PaymentResult.Declined -> DialogUi(
             icon = "✕",
-            title = "ОПЛАТА НЕ ПРОШЛА",
+            title = "ПОЖЕРТВОВАНИЕ НЕ ПРИНЯТО",
             message = "Пожертвование не было списано. Попробуйте ещё раз",
             buttonLabel = "ЗАКРЫТЬ"
         )

@@ -2928,7 +2928,10 @@ drawable btn_radio_off_mtrl
 drawable btn_radio_off_to_on_mtrl_animation
 drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
+drawable button_bg
+drawable card_divider
 drawable cross_background
+drawable cross_glow_background
 drawable cursor
 drawable design_fab_background
 drawable design_ic_visibility
@@ -3013,6 +3016,7 @@ drawable mtrl_switch_thumb_unchecked_pressed
 drawable mtrl_switch_track
 drawable mtrl_switch_track_decoration
 drawable mtrl_tabs_default_indicator
+drawable my_background
 drawable navigation_empty_icon
 drawable no_cursor
 drawable notification_action_background
@@ -3069,6 +3073,7 @@ font alegreya_italic
 font alegreya_medium
 font alegreya_regular
 font alegreya_semibold
+font times_new_roman_regular
 id ALT
 id BOTTOM_END
 id BOTTOM_START

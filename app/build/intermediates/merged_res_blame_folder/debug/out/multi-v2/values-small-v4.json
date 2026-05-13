@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.orthodox.charity.app-mergeDebugResources-2:/values-small-v4/values-small-v4.xml",
+            "outputFile": "com.orthodox.charity.app-mergeDebugResources-54:/values-small-v4/values-small-v4.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Аксёнов Егор\\.gradle\\caches\\transforms-4\\f04cd6244f4b9203b834102570208274\\transformed\\material-1.11.0\\res\\values-small-v4\\values-small-v4.xml",
+                    "source": "C:\\Users\\user\\.gradle\\caches\\transforms-4\\f04cd6244f4b9203b834102570208274\\transformed\\material-1.11.0\\res\\values-small-v4\\values-small-v4.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",

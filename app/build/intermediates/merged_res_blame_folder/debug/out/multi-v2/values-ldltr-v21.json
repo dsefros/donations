@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.orthodox.charity.app-mergeDebugResources-2:/values-ldltr-v21/values-ldltr-v21.xml",
+            "outputFile": "com.orthodox.charity.app-mergeDebugResources-54:/values-ldltr-v21/values-ldltr-v21.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Аксёнов Егор\\.gradle\\caches\\transforms-4\\04b980f1254cb7db2dd2d6314bcaaa48\\transformed\\appcompat-1.6.1\\res\\values-ldltr-v21\\values-ldltr-v21.xml",
+                    "source": "C:\\Users\\user\\.gradle\\caches\\transforms-4\\04b980f1254cb7db2dd2d6314bcaaa48\\transformed\\appcompat-1.6.1\\res\\values-ldltr-v21\\values-ldltr-v21.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

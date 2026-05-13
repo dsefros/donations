@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.orthodox.charity.app-mergeDebugResources-2:/values-he/values-he.xml",
+            "outputFile": "com.orthodox.charity.app-mergeDebugResources-54:/values-he/values-he.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Аксёнов Егор\\.gradle\\caches\\transforms-4\\ecb521e56139c5a2945f227fe07e8417\\transformed\\zxing-android-embedded-4.3.0\\res\\values-he\\values-he.xml",
+                    "source": "C:\\Users\\user\\.gradle\\caches\\transforms-4\\ecb521e56139c5a2945f227fe07e8417\\transformed\\zxing-android-embedded-4.3.0\\res\\values-he\\values-he.xml",
                     "from": {
                         "startLines": "2,3,4,5",
                         "startColumns": "4,4,4,4",

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.orthodox.charity.app-mergeDebugResources-2:/values-v24/values-v24.xml",
+            "outputFile": "com.orthodox.charity.app-mergeDebugResources-54:/values-v24/values-v24.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Аксёнов Егор\\.gradle\\caches\\transforms-4\\04b980f1254cb7db2dd2d6314bcaaa48\\transformed\\appcompat-1.6.1\\res\\values-v24\\values-v24.xml",
+                    "source": "C:\\Users\\user\\.gradle\\caches\\transforms-4\\04b980f1254cb7db2dd2d6314bcaaa48\\transformed\\appcompat-1.6.1\\res\\values-v24\\values-v24.xml",
                     "from": {
                         "startLines": "2,3",
                         "startColumns": "4,4",
@@ -14,7 +14,7 @@
                     }
                 },
                 {
-                    "source": "C:\\Users\\Аксёнов Егор\\.gradle\\caches\\transforms-4\\f04cd6244f4b9203b834102570208274\\transformed\\material-1.11.0\\res\\values-v24\\values-v24.xml",
+                    "source": "C:\\Users\\user\\.gradle\\caches\\transforms-4\\f04cd6244f4b9203b834102570208274\\transformed\\material-1.11.0\\res\\values-v24\\values-v24.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,9,12,15",
                         "startColumns": "4,4,4,4,4,4,4,4",

@@ -1,13 +1,18 @@
 R_DEF: Internal format may change without notice
 local
 drawable app_header_divider
+drawable button_bg
+drawable card_divider
 drawable cross_background
+drawable cross_glow_background
+drawable my_background
 drawable orthodox_cross_custom
 font alegreya_bold
 font alegreya_italic
 font alegreya_medium
 font alegreya_regular
 font alegreya_semibold
+font times_new_roman_regular
 mipmap ic_launcher
 string app_name
 xml device_admin
