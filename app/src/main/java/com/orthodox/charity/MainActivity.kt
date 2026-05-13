@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -456,7 +457,12 @@ fun DonationActionCard(
                     style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
                 )
             }
-            content()
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                content()
+            }
         }
 
         val actionInteraction = remember { MutableInteractionSource() }
@@ -492,39 +498,66 @@ fun DonationActionCard(
 
 @Composable
 fun AmountInput(value: String, onValueChange: (String) -> Unit) {
+    val amountTextStyle = TextStyle(
+        fontFamily = AlegreyaFontFamily,
+        fontSize = 30.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = TextMain,
+        textAlign = TextAlign.Start
+    )
+
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 42.dp)
+            .height(42.dp)
+            .wrapContentWidth()
             .clip(RoundedCornerShape(7.dp))
-            .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(7.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("₽", style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 18.sp, color = GoldDark))
-            Spacer(modifier = Modifier.width(6.dp))
-            BasicTextField(
-                value = value,
-                onValueChange = {
-                    if (it.all(Char::isDigit) && it.length <= 8) onValueChange(it)
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TextMain
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { inner ->
-                    if (value.isEmpty()) {
-                        Text("0", style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 24.sp, color = MutedWarm.copy(alpha = 0.45f)))
-                    }
-                    inner()
-                }
+            .border(
+                BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
+                RoundedCornerShape(7.dp)
             )
-        }
+            .background(Color.White.copy(alpha = 0.65f))
+            .padding(horizontal = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = {
+                if (it.all(Char::isDigit) && it.length <= 8) {
+                    onValueChange(it)
+                }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            textStyle = amountTextStyle,
+            modifier = Modifier
+                .wrapContentWidth()
+                .widthIn(min = 46.dp, max = 150.dp),
+            decorationBox = { innerTextField ->
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(contentAlignment = Alignment.BottomStart) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text = "0",
+                                style = amountTextStyle.copy(
+                                    color = MutedWarm.copy(alpha = 0.45f)
+                                )
+                            )
+                        }
+                        innerTextField()
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = "₽",
+                        style = amountTextStyle
+                    )
+                }
+            }
+        )
     }
 }
 
