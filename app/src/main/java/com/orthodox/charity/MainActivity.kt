@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -75,7 +76,7 @@ import com.skytech.smartskyposlib.TransactionResult
 import java.math.BigDecimal
 import kotlinx.coroutines.delay
 
-private val BgMain = Color.White
+private val BgMain = Color(0xFFF5F3F1)
 private val Gold = Color(0xFFAE8843)
 private val GoldDark = Color(0xFF8A6A30)
 private val BorderGold = Color(0xFFD0B98C)
@@ -83,6 +84,15 @@ private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
 private val FooterBar = Color(0xFF9A7B3E)
 private val ActionBrush = Brush.horizontalGradient(listOf(Color(0xFF9D7C3D), Color(0xFFB99653)))
+
+private val AlegreyaFontFamily = FontFamily(
+    Font(R.font.alegreya_regular, FontWeight.Normal),
+    Font(R.font.alegreya_italic, FontWeight.Normal, FontStyle.Italic),
+    Font(R.font.alegreya_medium, FontWeight.Medium),
+    Font(R.font.alegreya_semibold, FontWeight.SemiBold),
+    Font(R.font.alegreya_bold, FontWeight.Bold)
+)
+
 
 fun buildPaymentIntent(amount: BigDecimal): Intent =
     Intent("com.skytech.smartskypos.PAYMENT").apply {
@@ -214,7 +224,7 @@ fun AppHeader() {
         Text(
             text = "ПРАВОСЛАВНАЯ БЛАГОТВОРИТЕЛЬНОСТЬ",
             style = TextStyle(
-                fontFamily = FontFamily.Serif,
+                fontFamily = AlegreyaFontFamily,
                 fontSize = 16.sp,
                 letterSpacing = 1.8.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -225,7 +235,7 @@ fun AppHeader() {
         Text(
             text = "Помогите ближнему своему",
             style = TextStyle(
-                fontFamily = FontFamily.Serif,
+                fontFamily = AlegreyaFontFamily,
                 fontSize = 13.sp,
                 letterSpacing = 1.sp,
                 color = MutedWarm
@@ -260,7 +270,7 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                 text = "«Блажен, кто думает\nо бедном и нищем»",
                 textAlign = TextAlign.Center,
                 style = TextStyle(
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = AlegreyaFontFamily,
                     fontStyle = FontStyle.Italic,
                     color = GoldDark,
                     fontSize = 10.sp,
@@ -270,7 +280,7 @@ fun CrossPanel(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = "— Псалом 40:1",
-                style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 11.sp, color = MutedWarm)
+                style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
             )
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -280,11 +290,11 @@ fun CrossPanel(modifier: Modifier = Modifier) {
 @Composable
 private fun TreeBranchesBackground(modifier: Modifier = Modifier) {
     Canvas(modifier = modifier) {
-        val branchColor = Gold.copy(alpha = 0.03f)
-        val leafColor = GoldDark.copy(alpha = 0.028f)
+        val branchColor = Gold.copy(alpha = 0.055f)
+        val leafColor = GoldDark.copy(alpha = 0.045f)
         val w = size.width
         val h = size.height
-        val branchStroke = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round)
+        val branchStroke = Stroke(width = 1.35.dp.toPx(), cap = StrokeCap.Round)
 
         val mainBranch = Path().apply {
             moveTo(w * 0.06f, h * 0.86f)
@@ -302,7 +312,7 @@ private fun TreeBranchesBackground(modifier: Modifier = Modifier) {
             moveTo(w * 0.26f, h * 0.66f)
             quadraticBezierTo(w * 0.38f, h * 0.53f, w * 0.52f, h * 0.38f)
         }
-        drawPath(branchB, color = branchColor, style = Stroke(width = 0.9.dp.toPx(), cap = StrokeCap.Round))
+        drawPath(branchB, color = branchColor, style = Stroke(width = 1.0.dp.toPx(), cap = StrokeCap.Round))
 
         fun leaf(cx: Float, cy: Float, angle: Float, scale: Float) {
             rotate(degrees = angle, pivot = androidx.compose.ui.geometry.Offset(cx, cy)) {
@@ -373,7 +383,7 @@ fun ButtonsPanel(
             content = {
                 Text(
                     text = "500 ₽",
-                    style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 30.sp, color = TextMain, fontWeight = FontWeight.SemiBold)
+                    style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 30.sp, color = TextMain, fontWeight = FontWeight.SemiBold)
                 )
             }
         )
@@ -387,7 +397,7 @@ fun ButtonsPanel(
             content = {
                 Text(
                     text = "1000 ₽",
-                    style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 30.sp, color = TextMain, fontWeight = FontWeight.SemiBold)
+                    style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 30.sp, color = TextMain, fontWeight = FontWeight.SemiBold)
                 )
             }
         )
@@ -433,7 +443,7 @@ fun DonationActionCard(
                 Text(
                     text = title,
                     style = TextStyle(
-                        fontFamily = FontFamily.Serif,
+                        fontFamily = AlegreyaFontFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 17.sp,
                         color = GoldDark
@@ -443,7 +453,7 @@ fun DonationActionCard(
                     text = description,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 11.sp, color = MutedWarm)
+                    style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
                 )
             }
             content()
@@ -469,7 +479,7 @@ fun DonationActionCard(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 style = TextStyle(
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = AlegreyaFontFamily,
                     fontSize = if (actionLabel.contains("\n")) 12.sp else 11.sp,
                     lineHeight = 14.sp,
                     letterSpacing = 0.1.sp,
@@ -491,7 +501,7 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("₽", style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 18.sp, color = GoldDark))
+            Text("₽", style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 18.sp, color = GoldDark))
             Spacer(modifier = Modifier.width(6.dp))
             BasicTextField(
                 value = value,
@@ -501,7 +511,7 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 textStyle = TextStyle(
-                    fontFamily = FontFamily.Serif,
+                    fontFamily = AlegreyaFontFamily,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = TextMain
@@ -509,7 +519,7 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 decorationBox = { inner ->
                     if (value.isEmpty()) {
-                        Text("0", style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 24.sp, color = MutedWarm.copy(alpha = 0.45f)))
+                        Text("0", style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 24.sp, color = MutedWarm.copy(alpha = 0.45f)))
                     }
                     inner()
                 }
@@ -526,11 +536,11 @@ fun AppFooter() {
             modifier = Modifier.fillMaxWidth().background(FooterBar).padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("☦", style = TextStyle(color = Color.White, fontFamily = FontFamily.Serif, fontSize = 14.sp))
+            Text("☦", style = TextStyle(color = Color.White, fontFamily = AlegreyaFontFamily, fontSize = 14.sp))
             Spacer(modifier = Modifier.width(7.dp))
             Text(
                 "МОЛИТВА",
-                style = TextStyle(color = Color.White, fontFamily = FontFamily.Serif, fontSize = 12.sp, letterSpacing = 0.8.sp)
+                style = TextStyle(color = Color.White, fontFamily = AlegreyaFontFamily, fontSize = 12.sp, letterSpacing = 0.8.sp)
             )
         }
     }
@@ -566,9 +576,9 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(18.dp))
-            Text(dialogUi.icon, style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 28.sp, color = GoldDark))
+            Text(dialogUi.icon, style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 28.sp, color = GoldDark))
             Spacer(modifier = Modifier.height(6.dp))
-            Text(dialogUi.title, style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 16.sp, color = GoldDark, fontWeight = FontWeight.SemiBold))
+            Text(dialogUi.title, style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 16.sp, color = GoldDark, fontWeight = FontWeight.SemiBold))
             Spacer(modifier = Modifier.height(6.dp))
             val message = when (result) {
                 is PaymentResult.Success -> result.message
@@ -579,14 +589,14 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
                 text = message,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp),
-                style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 14.sp, color = TextMain)
+                style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 14.sp, color = TextMain)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = dialogUi.subtitle,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp),
-                style = TextStyle(fontFamily = FontFamily.Serif, fontSize = 11.sp, color = MutedWarm)
+                style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
             )
             Spacer(modifier = Modifier.height(14.dp))
             Box(
@@ -599,7 +609,7 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
                     .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(dialogUi.buttonLabel, style = TextStyle(color = Color.White, fontFamily = FontFamily.Serif, fontSize = 13.sp, letterSpacing = 1.sp))
+                Text(dialogUi.buttonLabel, style = TextStyle(color = Color.White, fontFamily = AlegreyaFontFamily, fontSize = 13.sp, letterSpacing = 1.sp))
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
