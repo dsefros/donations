@@ -1,7 +1,9 @@
 package com.orthodox.charity
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -69,9 +71,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.skytech.smartskyposlib.Constants
 import com.skytech.smartskyposlib.TransactionParams
 import com.skytech.smartskyposlib.TransactionResult
+import com.skytech.smartskyposlib.ui.PaymentActivity
+import com.skytech.smartskyposlib.ui.SkyPaymentActivityV2
 import java.math.BigDecimal
 import kotlinx.coroutines.delay
 
@@ -98,10 +101,10 @@ private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_bold, FontWeight.Bold)
 )
 
-fun buildPaymentIntent(amount: BigDecimal): Intent =
-    Intent("com.skytech.smartskypos.PAYMENT").apply {
-        putExtra(Constants.PARAMS_KEY, TransactionParams(amount))
-        putExtra(Constants.TYPE_KEY, Constants.TYPE_PAYMENT)
+fun buildPaymentIntent(context: Context, amount: BigDecimal): Intent =
+    Intent(context, SkyPaymentActivityV2::class.java).apply {
+        putExtra(PaymentActivity.PARAMS_KEY, TransactionParams(amount))
+        putExtra(PaymentActivity.TYPE_KEY, PaymentActivity.TYPE_PAYMENT)
     }
 
 sealed class PaymentResult {
@@ -143,7 +146,7 @@ class MainActivity : ComponentActivity() {
             OrthodoxCharityApp(
                 paymentResult = paymentResult.value,
                 onClearResult = { paymentResult.value = null },
-                onPayment = { amount -> posLauncher.launch(buildPaymentIntent(amount)) },
+                onPayment = { amount -> posLauncher.launch(buildPaymentIntent(this@MainActivity, amount)) },
                 customAmountValue = customAmount.value,
                 onCustomAmountChange = { customAmount.value = it }
             )
@@ -169,14 +172,27 @@ class MainActivity : ComponentActivity() {
     @Deprecated("Disabled")
     override fun onBackPressed() = Unit
 
+    private fun readTransactionResult(data: Intent?): TransactionResult? {
+        if (data == null) return null
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            data.getParcelableExtra(
+                PaymentActivity.RESULT_KEY,
+                TransactionResult::class.java
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            data.getParcelableExtra(PaymentActivity.RESULT_KEY)
+        }
+    }
+
     private fun handlePaymentResult(result: ActivityResult) {
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
             paymentResult.value = PaymentResult.Error("Оплата отменена или терминал недоступен")
             return
         }
 
-        val tx: TransactionResult? =
-            result.data?.getParcelableExtra(Constants.TRANSACTION_RESULT_KEY)
+        val tx = readTransactionResult(result.data)
 
         if (tx == null) {
             paymentResult.value = PaymentResult.Error("Нет данных о транзакции")
@@ -187,7 +203,9 @@ class MainActivity : ComponentActivity() {
         val message = tx.message ?: ""
         val rc = tx.rc ?: ""
 
-        paymentResult.value = if (code == 0 && rc == "00") {
+        val approved = tx.isApproved == true || (code == 0 && rc == "00")
+
+        paymentResult.value = if (approved) {
             PaymentResult.Success(message = message, rc = rc)
         } else {
             PaymentResult.Declined(code = code, message = message, rc = rc)

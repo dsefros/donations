@@ -57,5 +57,5 @@ dependencies {
     implementation 'androidx.compose.runtime:runtime'
     implementation 'androidx.compose.material3:material3'
 
-    implementation fileTree(dir: 'libs', include: ['*.aar'])
+    implementation files('libs/SmartSkyPosLib_v1.9.17.aar')
 }
