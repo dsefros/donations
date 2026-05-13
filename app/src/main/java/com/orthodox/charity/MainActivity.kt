@@ -84,7 +84,6 @@ private val GoldDark = Color(0xFF8A6A30)
 private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
-private val FooterBar = Color(0xFF9A7B3E)
 
 private val ActionBrush = Brush.horizontalGradient(
     listOf(
@@ -146,7 +145,9 @@ class MainActivity : ComponentActivity() {
             OrthodoxCharityApp(
                 paymentResult = paymentResult.value,
                 onClearResult = { paymentResult.value = null },
-                onPayment = { amount -> posLauncher.launch(buildPaymentIntent(this@MainActivity, amount)) },
+                onPayment = { amount ->
+                    posLauncher.launch(buildPaymentIntent(this@MainActivity, amount))
+                },
                 customAmountValue = customAmount.value,
                 onCustomAmountChange = { customAmount.value = it }
             )
@@ -254,7 +255,14 @@ fun OrthodoxCharityApp(
                 )
             }
 
-            AppFooter()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                AppOrnamentDivider()
+            }
         }
 
         paymentResult?.let {
@@ -299,15 +307,22 @@ fun AppHeader() {
 
         Spacer(modifier = Modifier.height(6.dp))
 
-        Image(
-            painter = painterResource(id = R.drawable.app_header_divider),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .width(170.dp)
-                .height(16.dp)
-        )
+        AppOrnamentDivider()
     }
+}
+
+@Composable
+fun AppOrnamentDivider(
+    modifier: Modifier = Modifier
+) {
+    Image(
+        painter = painterResource(id = R.drawable.app_header_divider),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier
+            .width(170.dp)
+            .height(16.dp)
+    )
 }
 
 @Composable
@@ -482,8 +497,7 @@ fun ButtonsPanel(
     onPayment: (BigDecimal) -> Unit
 ) {
     Column(
-        modifier = modifier.padding(top = 2.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = modifier.padding(top = 2.dp)
     ) {
         DonationActionCard(
             title = "СВОЯ СУММА",
@@ -509,6 +523,8 @@ fun ButtonsPanel(
             }
         )
 
+        Spacer(modifier = Modifier.height(12.dp))
+
         DonationActionCard(
             title = "ПОМОЩЬ ХРАМУ",
             description = "Восстановление и нужды церкви",
@@ -529,6 +545,8 @@ fun ButtonsPanel(
                 )
             }
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         DonationActionCard(
             title = "ДЕТСКИЙ ПРИЮТ",
@@ -657,7 +675,7 @@ fun DonationActionCard(
                 maxLines = 2,
                 style = TextStyle(
                     fontFamily = AlegreyaFontFamily,
-                    fontSize = if (actionLabel.contains("\n")) 14.sp else 14.sp,
+                    fontSize = 14.sp,
                     lineHeight = 14.sp,
                     letterSpacing = 0.1.sp,
                     color = Color.White
@@ -733,47 +751,6 @@ fun AmountInput(
             Text(
                 text = "₽",
                 style = amountTextStyle
-            )
-        }
-    }
-}
-
-@Composable
-fun AppFooter() {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(BorderGold)
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(FooterBar)
-                .padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "☦",
-                style = TextStyle(
-                    color = Color.White,
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 14.sp
-                )
-            )
-
-            Spacer(modifier = Modifier.width(7.dp))
-
-            Text(
-                text = "МОЛИТВА",
-                style = TextStyle(
-                    color = Color.White,
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 12.sp,
-                    letterSpacing = 0.8.sp
-                )
             )
         }
     }
