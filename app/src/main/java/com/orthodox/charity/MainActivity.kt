@@ -80,12 +80,17 @@ private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
 
-private val ActionBrush = Brush.horizontalGradient(
-    listOf(
-        Color(0xFF9D7C3D),
-        Color(0xFFB99653)
+private val ActionBrush = Brush.linearGradient(
+    colors = listOf(
+        Color(0xFF8E6B2F),
+        Color(0xFFB99047),
+        Color(0xFFD3B06A),
+        Color(0xFFA17835)
     )
 )
+
+private val CardSurface = Color(0xFFFBF7EE)
+private val InputSurface = Color(0xFFFFFDF7)
 
 private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_regular, FontWeight.Normal),
@@ -229,11 +234,11 @@ fun OrthodoxCharityApp(
             contentScale = ContentScale.Fit,
             modifier = Modifier
                 .align(Alignment.CenterStart)
-                .offset(x = (-85).dp, y = 8.dp)
-                .width(300.dp)
-                .height(340.dp)
+                .offset(x = (-118).dp, y = 22.dp)
+                .width(352.dp)
+                .height(402.dp)
                 .graphicsLayer {
-                    alpha = 0.90f
+                    alpha = 0.38f
                 }
         )
 
@@ -295,7 +300,7 @@ fun AppHeader() {
             style = TextStyle(
                 fontFamily = AlegreyaFontFamily,
                 fontSize = 16.sp,
-                letterSpacing = 1.8.sp,
+                letterSpacing = 2.1.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = GoldDark
             )
@@ -308,7 +313,7 @@ fun AppHeader() {
             style = TextStyle(
                 fontFamily = AlegreyaFontFamily,
                 fontSize = 13.sp,
-                letterSpacing = 1.sp,
+                letterSpacing = 0.8.sp,
                 color = MutedWarm
             )
         )
@@ -343,10 +348,10 @@ fun CrossPanel(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             ShimmeringCross(
-                modifier = Modifier.size(width = 98.dp, height = 160.dp)
+                modifier = Modifier.size(width = 102.dp, height = 168.dp)
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -359,7 +364,7 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                     fontStyle = FontStyle.Italic,
                     color = GoldDark,
                     fontSize = 10.sp,
-                    lineHeight = 15.sp
+                    lineHeight = 13.sp
                 )
             )
 
@@ -369,7 +374,7 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                 text = "— Псалом 40:1",
                 style = TextStyle(
                     fontFamily = AlegreyaFontFamily,
-                    fontSize = 11.sp,
+                    fontSize = 10.5.sp,
                     color = MutedWarm
                 )
             )
@@ -446,17 +451,7 @@ fun ButtonsPanel(
             clickWholeCard = true,
             onClick = { onPayment(BigDecimal("500.00")) },
             content = {
-                Text(
-                    text = "500 ₽",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
-                        fontSize = 30.sp,
-                        color = TextMain,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
+                AmountWithDivider(amountText = "500 ₽")
             }
         )
 
@@ -469,18 +464,54 @@ fun ButtonsPanel(
             clickWholeCard = true,
             onClick = { onPayment(BigDecimal("1000.00")) },
             content = {
-                Text(
-                    text = "1000 ₽",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
-                        fontSize = 30.sp,
-                        color = TextMain,
-                        fontWeight = FontWeight.Medium
-                    )
-                )
+                AmountWithDivider(amountText = "1000 ₽")
             }
+        )
+    }
+}
+
+@Composable
+private fun AmountWithDivider(amountText: String) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+                    .background(BorderGold.copy(alpha = 0.55f))
+            )
+            Text(
+                text = "✦",
+                modifier = Modifier.padding(horizontal = 6.dp),
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 10.sp,
+                    color = BorderGold
+                )
+            )
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(1.dp)
+                    .background(BorderGold.copy(alpha = 0.55f))
+            )
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = amountText,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = TextStyle(
+                fontFamily = AlegreyaFontFamily,
+                fontSize = 30.sp,
+                color = TextMain,
+                fontWeight = FontWeight.SemiBold
+            )
         )
     }
 }
@@ -519,15 +550,20 @@ fun DonationActionCard(
             .height(100.dp)
             .scale(scale)
             .clip(RoundedCornerShape(11.dp))
-            .background(BgMain.copy(alpha = 0.75f))
-            .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(11.dp))
+            .graphicsLayer {
+                shadowElevation = 8.dp.toPx()
+                shape = RoundedCornerShape(12.dp)
+                clip = true
+            }
+            .background(CardSurface)
+            .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.85f)), RoundedCornerShape(12.dp))
             .then(cardClickModifier)
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
+                .padding(start = 10.dp, top = 8.dp, end = 10.dp, bottom = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
@@ -574,8 +610,9 @@ fun DonationActionCard(
                 .width(120.dp)
                 .fillMaxHeight()
                 .scale(actionScale)
-                .clip(RoundedCornerShape(10.dp))
+                 .clip(RoundedCornerShape(10.dp))
                 .background(ActionBrush)
+                .border(BorderStroke(1.dp, Color(0xFFF1DEB5).copy(alpha = 0.65f)), RoundedCornerShape(10.dp))
                 .clickable(
                     interactionSource = actionInteraction,
                     indication = null,
@@ -584,13 +621,13 @@ fun DonationActionCard(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = actionLabel,
+                text = "✦\n$actionLabel\n✦",
                 textAlign = TextAlign.Center,
-                maxLines = 2,
+                maxLines = 4,
                 style = TextStyle(
                     fontFamily = AlegreyaFontFamily,
                     fontSize = 14.sp,
-                    lineHeight = 14.sp,
+                    lineHeight = 15.sp,
                     letterSpacing = 0.1.sp,
                     color = Color.White
                 )
@@ -607,21 +644,21 @@ fun AmountInput(
     val amountTextStyle = TextStyle(
         fontFamily = AlegreyaFontFamily,
         fontSize = 30.sp,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         color = TextMain,
         textAlign = TextAlign.Center
     )
 
     Box(
         modifier = Modifier
-            .width(172.dp)
+             .width(180.dp)
             .height(42.dp)
-            .clip(RoundedCornerShape(7.dp))
+            .clip(RoundedCornerShape(8.dp))
             .border(
-                BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
-                RoundedCornerShape(7.dp)
+                BorderStroke(1.dp, BorderGold.copy(alpha = 0.9f)),
+                RoundedCornerShape(8.dp)
             )
-            .background(BgMain.copy(alpha = 0.75f))
+            .background(InputSurface)
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
