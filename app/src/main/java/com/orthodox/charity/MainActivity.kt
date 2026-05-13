@@ -492,39 +492,54 @@ fun DonationActionCard(
 
 @Composable
 fun AmountInput(value: String, onValueChange: (String) -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 42.dp)
-            .clip(RoundedCornerShape(7.dp))
-            .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(7.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+    Row(
+        modifier = Modifier.height(38.dp),
+        verticalAlignment = Alignment.Bottom
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("₽", style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 18.sp, color = GoldDark))
-            Spacer(modifier = Modifier.width(6.dp))
-            BasicTextField(
-                value = value,
-                onValueChange = {
-                    if (it.all(Char::isDigit) && it.length <= 8) onValueChange(it)
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = TextMain
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                decorationBox = { inner ->
-                    if (value.isEmpty()) {
-                        Text("0", style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 24.sp, color = MutedWarm.copy(alpha = 0.45f)))
-                    }
-                    inner()
+        BasicTextField(
+            value = value,
+            onValueChange = {
+                if (it.all(Char::isDigit) && it.length <= 8) {
+                    onValueChange(it)
                 }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            textStyle = TextStyle(
+                fontFamily = AlegreyaFontFamily,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextMain,
+                textAlign = TextAlign.Start
+            ),
+            modifier = Modifier.width(88.dp),
+            decorationBox = { innerTextField ->
+                if (value.isEmpty()) {
+                    Text(
+                        text = "0",
+                        style = TextStyle(
+                            fontFamily = AlegreyaFontFamily,
+                            fontSize = 30.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MutedWarm.copy(alpha = 0.45f)
+                        )
+                    )
+                }
+                innerTextField()
+            }
+        )
+
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Text(
+            text = "₽",
+            style = TextStyle(
+                fontFamily = AlegreyaFontFamily,
+                fontSize = 30.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = TextMain
             )
-        }
+        )
     }
 }
 
