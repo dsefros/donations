@@ -19,7 +19,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -54,10 +54,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -79,7 +75,6 @@ import java.math.BigDecimal
 import kotlinx.coroutines.delay
 
 private val BgMain = Color(0xFFF5F3F1)
-private val Gold = Color(0xFFAE8843)
 private val GoldDark = Color(0xFF8A6A30)
 private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
@@ -229,6 +224,20 @@ fun OrthodoxCharityApp(
             .fillMaxSize()
             .background(BgMain)
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.cross_background),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .offset(x = (-85).dp, y = 8.dp)
+                .width(300.dp)
+                .height(340.dp)
+                .graphicsLayer {
+                    alpha = 0.26f
+                }
+        )
+
         Column(modifier = Modifier.fillMaxSize()) {
             AppHeader()
 
@@ -327,14 +336,10 @@ fun AppOrnamentDivider(
 
 @Composable
 fun CrossPanel(modifier: Modifier = Modifier) {
-    Box(modifier = modifier) {
-        TreeBranchesBackground(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(120.dp)
-                .align(Alignment.CenterStart)
-        )
-
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.TopCenter
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -372,96 +377,6 @@ fun CrossPanel(modifier: Modifier = Modifier) {
 
             Spacer(modifier = Modifier.weight(1f))
         }
-    }
-}
-
-@Composable
-private fun TreeBranchesBackground(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        val branchColor = Gold.copy(alpha = 0.055f)
-        val leafColor = GoldDark.copy(alpha = 0.045f)
-
-        val w = size.width
-        val h = size.height
-
-        val mainBranch = Path().apply {
-            moveTo(w * 0.06f, h * 0.86f)
-            quadraticBezierTo(
-                w * 0.24f,
-                h * 0.70f,
-                w * 0.42f,
-                h * 0.56f
-            )
-        }
-
-        drawPath(
-            path = mainBranch,
-            color = branchColor,
-            style = Stroke(width = 1.35.dp.toPx(), cap = StrokeCap.Round)
-        )
-
-        val branchA = Path().apply {
-            moveTo(w * 0.16f, h * 0.73f)
-            quadraticBezierTo(
-                w * 0.28f,
-                h * 0.60f,
-                w * 0.44f,
-                h * 0.46f
-            )
-        }
-
-        drawPath(
-            path = branchA,
-            color = branchColor,
-            style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
-        )
-
-        val branchB = Path().apply {
-            moveTo(w * 0.26f, h * 0.66f)
-            quadraticBezierTo(
-                w * 0.38f,
-                h * 0.53f,
-                w * 0.52f,
-                h * 0.38f
-            )
-        }
-
-        drawPath(
-            path = branchB,
-            color = branchColor,
-            style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round)
-        )
-
-        fun leaf(cx: Float, cy: Float, angle: Float, scale: Float) {
-            rotate(
-                degrees = angle,
-                pivot = androidx.compose.ui.geometry.Offset(cx, cy)
-            ) {
-                val p = Path().apply {
-                    moveTo(cx, cy)
-                    quadraticBezierTo(
-                        cx + 7f * scale,
-                        cy - 3f * scale,
-                        cx + 2f * scale,
-                        cy - 10f * scale
-                    )
-                    quadraticBezierTo(
-                        cx - 3f * scale,
-                        cy - 4f * scale,
-                        cx,
-                        cy
-                    )
-                    close()
-                }
-
-                drawPath(path = p, color = leafColor)
-            }
-        }
-
-        leaf(w * 0.42f, h * 0.56f, -10f, 0.8f)
-        leaf(w * 0.45f, h * 0.48f, 20f, 0.75f)
-        leaf(w * 0.52f, h * 0.39f, 5f, 0.7f)
-        leaf(w * 0.34f, h * 0.60f, -20f, 0.65f)
     }
 }
 
