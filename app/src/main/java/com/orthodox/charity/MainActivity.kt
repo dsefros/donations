@@ -102,9 +102,9 @@ fun buildPaymentIntent(context: Context, amount: BigDecimal): Intent =
     }
 
 sealed class PaymentResult {
-    data class Success(val message: String, val rc: String) : PaymentResult()
-    data class Declined(val code: Int, val message: String, val rc: String) : PaymentResult()
-    data class Error(val reason: String) : PaymentResult()
+    object Success : PaymentResult()
+    object Declined : PaymentResult()
+    object Error : PaymentResult()
 }
 
 class MainActivity : ComponentActivity() {
@@ -184,27 +184,26 @@ class MainActivity : ComponentActivity() {
 
     private fun handlePaymentResult(result: ActivityResult) {
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
-            paymentResult.value = PaymentResult.Error("Оплата отменена или терминал недоступен")
+            paymentResult.value = PaymentResult.Error
             return
         }
 
         val tx = readTransactionResult(result.data)
 
         if (tx == null) {
-            paymentResult.value = PaymentResult.Error("Нет данных о транзакции")
+            paymentResult.value = PaymentResult.Error
             return
         }
 
         val code = tx.code
-        val message = tx.message ?: ""
         val rc = tx.rc ?: ""
 
-        val approved = tx.isApproved == true || (code == 0 && rc == "00")
+        val approved = code == 0 && rc == "00"
 
         paymentResult.value = if (approved) {
-            PaymentResult.Success(message = message, rc = rc)
+            PaymentResult.Success
         } else {
-            PaymentResult.Declined(code = code, message = message, rc = rc)
+            PaymentResult.Declined
         }
 
         customAmount.value = "2000"
@@ -234,7 +233,7 @@ fun OrthodoxCharityApp(
                 .width(300.dp)
                 .height(340.dp)
                 .graphicsLayer {
-                    alpha = 0.26f
+                    alpha = 0.90f
                 }
         )
 
@@ -417,7 +416,7 @@ fun ButtonsPanel(
         DonationActionCard(
             title = "СВОЯ СУММА",
             description = "Введите любую сумму",
-            actionLabel = "ВНЕСТИ\nЛЕПТУ",
+            actionLabel = "ВНЕСТИ ЛЕПТУ",
             clickWholeCard = false,
             onClick = {
                 val parsed = customAmount.toBigDecimalOrNull()
@@ -455,7 +454,7 @@ fun ButtonsPanel(
                         fontFamily = AlegreyaFontFamily,
                         fontSize = 30.sp,
                         color = TextMain,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Medium
                     )
                 )
             }
@@ -478,7 +477,7 @@ fun ButtonsPanel(
                         fontFamily = AlegreyaFontFamily,
                         fontSize = 30.sp,
                         color = TextMain,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Medium
                     )
                 )
             }
@@ -520,7 +519,7 @@ fun DonationActionCard(
             .height(100.dp)
             .scale(scale)
             .clip(RoundedCornerShape(11.dp))
-            .background(Color.White)
+            .background(BgMain.copy(alpha = 0.75f))
             .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(11.dp))
             .then(cardClickModifier)
     ) {
@@ -608,7 +607,7 @@ fun AmountInput(
     val amountTextStyle = TextStyle(
         fontFamily = AlegreyaFontFamily,
         fontSize = 30.sp,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Medium,
         color = TextMain,
         textAlign = TextAlign.Center
     )
@@ -622,7 +621,7 @@ fun AmountInput(
                 BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
                 RoundedCornerShape(7.dp)
             )
-            .background(Color.White.copy(alpha = 0.65f))
+            .background(BgMain.copy(alpha = 0.75f))
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -685,21 +684,21 @@ fun PaymentResultDialog(
         is PaymentResult.Success -> DialogUi(
             icon = "☩",
             title = "ОПЛАТА ПРИНЯТА",
-            subtitle = "Код ответа: ${result.rc}",
+            message = "Спасибо за ваше пожертвование",
             buttonLabel = "А М И Н Ь"
         )
 
         is PaymentResult.Declined -> DialogUi(
             icon = "✕",
-            title = "ОТКЛОНЕНО",
-            subtitle = "RC: ${result.rc} • Код: ${result.code}",
+            title = "ОПЛАТА НЕ ПРОШЛА",
+            message = "Пожертвование не было списано. Попробуйте ещё раз",
             buttonLabel = "ЗАКРЫТЬ"
         )
 
         is PaymentResult.Error -> DialogUi(
             icon = "!",
             title = "ОШИБКА",
-            subtitle = result.reason,
+            message = "Не удалось выполнить оплату. Попробуйте ещё раз",
             buttonLabel = "ЗАКРЫТЬ"
         )
     }
@@ -751,16 +750,10 @@ fun PaymentResultDialog(
                 )
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
-
-            val message = when (result) {
-                is PaymentResult.Success -> result.message
-                is PaymentResult.Declined -> result.message
-                is PaymentResult.Error -> result.reason
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = message,
+                text = dialogUi.message,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp),
                 style = TextStyle(
@@ -770,20 +763,7 @@ fun PaymentResultDialog(
                 )
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = dialogUi.subtitle,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp),
-                style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 11.sp,
-                    color = MutedWarm
-                )
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             Box(
                 modifier = Modifier
@@ -814,6 +794,6 @@ fun PaymentResultDialog(
 private data class DialogUi(
     val icon: String,
     val title: String,
-    val subtitle: String,
+    val message: String,
     val buttonLabel: String
 )
