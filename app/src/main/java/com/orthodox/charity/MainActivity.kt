@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -50,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -246,17 +248,18 @@ fun AppHeader() {
 @Composable
 fun CrossPanel(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier.padding(top = 10.dp),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        ShimmeringCross(modifier = Modifier.size(width = 98.dp, height = 160.dp))
         Spacer(modifier = Modifier.height(18.dp))
+        ShimmeringCross(modifier = Modifier.size(width = 98.dp, height = 160.dp))
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = "«Блажен, кто думает\nо бедном и нищем»",
             style = TextStyle(
                 fontFamily = FontFamily.Serif,
-                fontSize = 19.sp/2,
+                fontSize = 10.sp,
                 lineHeight = 15.sp,
                 color = GoldDark,
                 textAlign = TextAlign.Center,
@@ -273,20 +276,30 @@ fun CrossPanel(modifier: Modifier = Modifier) {
                 textAlign = TextAlign.Center
             )
         )
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
 @Composable
 fun ShimmeringCross(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "cross_shimmer")
-    val shift by transition.animateFloat(
-        initialValue = -1f,
-        targetValue = 2f,
+    val shimmerShift by transition.animateFloat(
+        initialValue = -1.8f,
+        targetValue = 2.4f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 2400, easing = LinearEasing),
+            animation = tween(durationMillis = 3800, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "shimmer_shift"
+    )
+    val breatheAlpha by transition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 2600),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cross_breathe"
     )
 
     androidx.compose.foundation.Image(
@@ -294,22 +307,23 @@ fun ShimmeringCross(modifier: Modifier = Modifier) {
         contentDescription = "Православный крест",
         contentScale = ContentScale.Fit,
         modifier = modifier
-            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+            .graphicsLayer {
+                alpha = breatheAlpha
+                compositingStrategy = CompositingStrategy.Offscreen
+            }
             .drawWithContent {
                 drawContent()
-                val w = size.width
-                val h = size.height
-                val startX = (shift - 0.45f) * w
-                val endX = (shift + 0.45f) * w
+                val bandHalfWidth = size.width * 0.18f
+                val x = size.width * shimmerShift
                 drawRect(
                     brush = Brush.linearGradient(
                         colors = listOf(
                             Color.Transparent,
-                            Color.White.copy(alpha = 0.13f),
+                            Color.White.copy(alpha = 0.07f),
                             Color.Transparent
                         ),
-                        start = androidx.compose.ui.geometry.Offset(startX, h),
-                        end = androidx.compose.ui.geometry.Offset(endX, 0f)
+                        start = Offset(x - bandHalfWidth, size.height),
+                        end = Offset(x + bandHalfWidth, 0f)
                     ),
                     blendMode = BlendMode.SrcAtop
                 )
@@ -351,7 +365,7 @@ fun ButtonsPanel(
             content = {
                 Text(
                     text = "500 ₽",
-                    style = TextStyle(fontFamily = FontFamily.Serif, color = TextMain, fontSize = 38.sp / 1.3f, fontWeight = FontWeight.SemiBold)
+                    style = TextStyle(fontFamily = FontFamily.Serif, color = TextMain, fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
                 )
             }
         )
@@ -365,7 +379,7 @@ fun ButtonsPanel(
             content = {
                 Text(
                     text = "1 000 ₽",
-                    style = TextStyle(fontFamily = FontFamily.Serif, color = TextMain, fontSize = 38.sp / 1.3f, fontWeight = FontWeight.SemiBold)
+                    style = TextStyle(fontFamily = FontFamily.Serif, color = TextMain, fontSize = 30.sp, fontWeight = FontWeight.SemiBold)
                 )
             }
         )
@@ -407,7 +421,7 @@ fun DonationActionCard(
             .then(cardClick)
     ) {
         Column(
-            modifier = Modifier.weight(1f).padding(start = 10.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
+            modifier = Modifier.weight(1f).fillMaxHeight().padding(start = 10.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
@@ -437,7 +451,7 @@ fun DonationActionCard(
         Box(
             modifier = Modifier
                 .padding(2.dp)
-                .width(100.dp)
+                .width(108.dp)
                 .fillMaxSize()
                 .scale(actionScale)
                 .clip(RoundedCornerShape(10.dp))
@@ -451,11 +465,14 @@ fun DonationActionCard(
                 style = TextStyle(
                     color = Color.White,
                     fontFamily = FontFamily.Serif,
-                    fontSize = 13.sp,
-                    lineHeight = 15.sp,
-                    letterSpacing = 0.2.sp,
+                    fontSize = if (actionLabel.contains("\n")) 12.sp else 11.sp,
+                    lineHeight = 14.sp,
+                    letterSpacing = 0.1.sp,
                     fontWeight = FontWeight.Medium
-                )
+                ),
+                maxLines = 2,
+                softWrap = true,
+                overflow = TextOverflow.Clip
             )
         }
     }
@@ -480,15 +497,16 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
             BasicTextField(
                 value = value,
                 onValueChange = {
-                    if (it.all(Char::isDigit) && it.length <= 8) onValueChange(it)
-                    if (it.isEmpty()) onValueChange(it)
+                    if (it.all(Char::isDigit) && it.length <= 8) {
+                        onValueChange(it)
+                    }
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 textStyle = TextStyle(
                     color = TextMain,
                     fontFamily = FontFamily.Serif,
-                    fontSize = 30.sp,
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.SemiBold
                 ),
                 modifier = Modifier.fillMaxWidth(),
@@ -535,10 +553,10 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
         onDismiss()
     }
 
-    val (icon, title, subtitle, btnLabel) = when (result) {
-        is PaymentResult.Success -> Quad("☩", "ОПЛАТА ПРИНЯТА", "Код ответа: ${result.rc}", "А М И Н Ь")
-        is PaymentResult.Declined -> Quad("✕", "ОТКЛОНЕНО", "RC: ${result.rc} • Код: ${result.code}", "ЗАКРЫТЬ")
-        is PaymentResult.Error -> Quad("!", "ОШИБКА", result.reason, "ЗАКРЫТЬ")
+    val dialogUi = when (result) {
+        is PaymentResult.Success -> DialogUi("☩", "ОПЛАТА ПРИНЯТА", "Код ответа: ${result.rc}", "А М И Н Ь")
+        is PaymentResult.Declined -> DialogUi("✕", "ОТКЛОНЕНО", "RC: ${result.rc} • Код: ${result.code}", "ЗАКРЫТЬ")
+        is PaymentResult.Error -> DialogUi("!", "ОШИБКА", result.reason, "ЗАКРЫТЬ")
     }
 
     Box(
@@ -558,9 +576,9 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(18.dp))
-            Text(icon, style = TextStyle(color = GoldDark, fontSize = 28.sp, fontFamily = FontFamily.Serif))
+            Text(dialogUi.icon, style = TextStyle(color = GoldDark, fontSize = 28.sp, fontFamily = FontFamily.Serif))
             Spacer(modifier = Modifier.height(6.dp))
-            Text(title, style = TextStyle(color = GoldDark, fontSize = 16.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold))
+            Text(dialogUi.title, style = TextStyle(color = GoldDark, fontSize = 16.sp, fontFamily = FontFamily.Serif, fontWeight = FontWeight.SemiBold))
             Spacer(modifier = Modifier.height(6.dp))
             val message = when (result) {
                 is PaymentResult.Success -> result.message
@@ -569,7 +587,7 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
             }
             Text(message, textAlign = TextAlign.Center, style = TextStyle(color = TextMain, fontSize = 14.sp, fontFamily = FontFamily.Serif), modifier = Modifier.padding(horizontal = 16.dp))
             Spacer(modifier = Modifier.height(4.dp))
-            Text(subtitle, textAlign = TextAlign.Center, style = TextStyle(color = MutedWarm, fontSize = 11.sp, fontFamily = FontFamily.Serif), modifier = Modifier.padding(horizontal = 16.dp))
+            Text(dialogUi.subtitle, textAlign = TextAlign.Center, style = TextStyle(color = MutedWarm, fontSize = 11.sp, fontFamily = FontFamily.Serif), modifier = Modifier.padding(horizontal = 16.dp))
             Spacer(modifier = Modifier.height(14.dp))
             Box(
                 modifier = Modifier
@@ -581,11 +599,16 @@ fun PaymentResultDialog(result: PaymentResult, onDismiss: () -> Unit) {
                     .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(btnLabel, style = TextStyle(color = Color.White, fontSize = 13.sp, fontFamily = FontFamily.Serif, letterSpacing = 1.sp, fontWeight = FontWeight.Medium))
+                Text(dialogUi.buttonLabel, style = TextStyle(color = Color.White, fontSize = 13.sp, fontFamily = FontFamily.Serif, letterSpacing = 1.sp, fontWeight = FontWeight.Medium))
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
-data class Quad(val a: String, val b: String, val c: String, val d: String)
+private data class DialogUi(
+    val icon: String,
+    val title: String,
+    val subtitle: String,
+    val buttonLabel: String
+)
