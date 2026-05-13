@@ -33,12 +33,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -503,41 +501,43 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
         fontSize = 30.sp,
         fontWeight = FontWeight.SemiBold,
         color = TextMain,
-        textAlign = TextAlign.Start
+        textAlign = TextAlign.Center
     )
 
     Box(
         modifier = Modifier
+            .width(132.dp)
             .height(42.dp)
-            .wrapContentWidth()
             .clip(RoundedCornerShape(7.dp))
             .border(
                 BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
                 RoundedCornerShape(7.dp)
             )
             .background(Color.White.copy(alpha = 0.65f))
-            .padding(horizontal = 10.dp),
+            .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
-        BasicTextField(
-            value = value,
-            onValueChange = {
-                if (it.all(Char::isDigit) && it.length <= 8) {
-                    onValueChange(it)
-                }
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            textStyle = amountTextStyle,
-            modifier = Modifier
-                .wrapContentWidth()
-                .widthIn(min = 46.dp, max = 150.dp),
-            decorationBox = { innerTextField ->
-                Row(
-                    verticalAlignment = Alignment.Bottom,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Box(contentAlignment = Alignment.BottomStart) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            BasicTextField(
+                value = value,
+                onValueChange = {
+                    if (it.all(Char::isDigit) && it.length <= 8) {
+                        onValueChange(it)
+                    }
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                textStyle = amountTextStyle,
+                modifier = Modifier.width(76.dp),
+                decorationBox = { innerTextField ->
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
                         if (value.isEmpty()) {
                             Text(
                                 text = "0",
@@ -548,16 +548,16 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
                         }
                         innerTextField()
                     }
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Text(
-                        text = "₽",
-                        style = amountTextStyle
-                    )
                 }
-            }
-        )
+            )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Text(
+                text = "₽",
+                style = amountTextStyle
+            )
+        }
     }
 }
 
