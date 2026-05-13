@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -248,18 +249,12 @@ fun OrthodoxCharityApp(
                 }
         )
 
-        Image(
-            painter = painterResource(id = R.drawable.cross_glow_background),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
+        AnimatedCrossGlow(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .offset(x = (-4).dp, y = (-56).dp)
                 .width(150.dp)
                 .height(250.dp)
-                .graphicsLayer {
-                    alpha = 0.85f
-                }
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -305,6 +300,64 @@ fun OrthodoxCharityApp(
             )
         }
     }
+}
+
+@Composable
+private fun AnimatedCrossGlow(
+    modifier: Modifier = Modifier
+) {
+    val transition = rememberInfiniteTransition(label = "cross_glow_breathe")
+
+    val glowAlpha by transition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 0.92f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cross_glow_alpha"
+    )
+
+    val glowScale by transition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1.06f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cross_glow_scale"
+    )
+
+    val glowOffsetY by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = -3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cross_glow_offset_y"
+    )
+
+    Image(
+        painter = painterResource(id = R.drawable.cross_glow_background),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier.graphicsLayer {
+            alpha = glowAlpha
+            scaleX = glowScale
+            scaleY = glowScale
+            translationY = glowOffsetY
+        }
+    )
 }
 
 @Composable
