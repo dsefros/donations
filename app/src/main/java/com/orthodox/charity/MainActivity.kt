@@ -480,7 +480,7 @@ fun ButtonsPanel(
             }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         DonationActionCard(
             title = "ПОМОЩЬ ХРАМУ",
@@ -504,7 +504,7 @@ fun ButtonsPanel(
             }
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         DonationActionCard(
             title = "ДЕТСКИЙ ПРИЮТ",
