@@ -38,6 +38,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -456,7 +457,12 @@ fun DonationActionCard(
                     style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 11.sp, color = MutedWarm)
                 )
             }
-            content()
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                content()
+            }
         }
 
         val actionInteraction = remember { MutableInteractionSource() }
@@ -492,9 +498,26 @@ fun DonationActionCard(
 
 @Composable
 fun AmountInput(value: String, onValueChange: (String) -> Unit) {
-    Row(
-        modifier = Modifier.height(38.dp),
-        verticalAlignment = Alignment.Bottom
+    val amountTextStyle = TextStyle(
+        fontFamily = AlegreyaFontFamily,
+        fontSize = 30.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = TextMain,
+        textAlign = TextAlign.Start
+    )
+
+    Box(
+        modifier = Modifier
+            .height(42.dp)
+            .wrapContentWidth()
+            .clip(RoundedCornerShape(7.dp))
+            .border(
+                BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
+                RoundedCornerShape(7.dp)
+            )
+            .background(Color.White.copy(alpha = 0.65f))
+            .padding(horizontal = 10.dp),
+        contentAlignment = Alignment.Center
     ) {
         BasicTextField(
             value = value,
@@ -505,40 +528,35 @@ fun AmountInput(value: String, onValueChange: (String) -> Unit) {
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            textStyle = TextStyle(
-                fontFamily = AlegreyaFontFamily,
-                fontSize = 30.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextMain,
-                textAlign = TextAlign.Start
-            ),
-            modifier = Modifier.width(88.dp),
+            textStyle = amountTextStyle,
+            modifier = Modifier
+                .wrapContentWidth()
+                .widthIn(min = 46.dp, max = 150.dp),
             decorationBox = { innerTextField ->
-                if (value.isEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(contentAlignment = Alignment.BottomStart) {
+                        if (value.isEmpty()) {
+                            Text(
+                                text = "0",
+                                style = amountTextStyle.copy(
+                                    color = MutedWarm.copy(alpha = 0.45f)
+                                )
+                            )
+                        }
+                        innerTextField()
+                    }
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
                     Text(
-                        text = "0",
-                        style = TextStyle(
-                            fontFamily = AlegreyaFontFamily,
-                            fontSize = 30.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MutedWarm.copy(alpha = 0.45f)
-                        )
+                        text = "₽",
+                        style = amountTextStyle
                     )
                 }
-                innerTextField()
             }
-        )
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Text(
-            text = "₽",
-            style = TextStyle(
-                fontFamily = AlegreyaFontFamily,
-                fontSize = 30.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = TextMain
-            )
         )
     }
 }
