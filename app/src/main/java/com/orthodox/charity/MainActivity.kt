@@ -3,6 +3,7 @@ package com.orthodox.charity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -85,6 +86,9 @@ private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
 
+private const val MAIN_LOOP_VOLUME = 0.35f
+private const val PAYMENT_RESULT_VOLUME = 0.75f
+
 private val ActionBrush = Brush.horizontalGradient(
     listOf(
         Color(0xFF9D7C3D),
@@ -122,6 +126,9 @@ sealed class PaymentResult {
 
 class MainActivity : ComponentActivity() {
 
+    private var mainLoopPlayer: MediaPlayer? = null
+    private var paymentResultPlayer: MediaPlayer? = null
+
     private val paymentResult = mutableStateOf<PaymentResult?>(null)
     private val customAmount = mutableStateOf("2000")
 
@@ -134,11 +141,122 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        prepareMainLoopPlayer()
+
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
         )
 
+        enableImmersiveMode()
+
+        setContent {
+            OrthodoxCharityApp(
+                paymentResult = paymentResult.value,
+                onClearResult = { paymentResult.value = null },
+                onPayment = { amount ->
+                    pauseMainLoop()
+                    posLauncher.launch(buildPaymentIntent(this@MainActivity, amount))
+                },
+                customAmountValue = customAmount.value,
+                onCustomAmountChange = { customAmount.value = it }
+            )
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (paymentResultPlayer?.isPlaying != true) {
+            startMainLoop()
+        }
+    }
+
+    override fun onPause() {
+        pauseMainLoop()
+        pausePaymentResultSound()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        paymentResultPlayer?.release()
+        paymentResultPlayer = null
+
+        mainLoopPlayer?.release()
+        mainLoopPlayer = null
+
+        super.onDestroy()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+
+        if (hasFocus) {
+            enableImmersiveMode()
+        }
+    }
+
+    @Deprecated("Disabled")
+    override fun onBackPressed() = Unit
+
+    private fun prepareMainLoopPlayer() {
+        if (mainLoopPlayer != null) return
+
+        mainLoopPlayer = MediaPlayer.create(this, R.raw.main_loop)?.apply {
+            isLooping = true
+            setVolume(MAIN_LOOP_VOLUME, MAIN_LOOP_VOLUME)
+        }
+    }
+
+    private fun startMainLoop() {
+        val player = mainLoopPlayer ?: return
+
+        if (!player.isPlaying) {
+            player.start()
+        }
+    }
+
+    private fun pauseMainLoop() {
+        val player = mainLoopPlayer ?: return
+
+        if (player.isPlaying) {
+            player.pause()
+        }
+    }
+
+    private fun playPaymentResultSound() {
+        pauseMainLoop()
+
+        paymentResultPlayer?.release()
+        paymentResultPlayer = null
+
+        paymentResultPlayer = MediaPlayer.create(this, R.raw.payment_result)?.apply {
+            isLooping = false
+            setVolume(PAYMENT_RESULT_VOLUME, PAYMENT_RESULT_VOLUME)
+
+            setOnCompletionListener { completedPlayer ->
+                completedPlayer.release()
+
+                if (paymentResultPlayer === completedPlayer) {
+                    paymentResultPlayer = null
+                }
+
+                startMainLoop()
+            }
+
+            start()
+        }
+    }
+
+    private fun pausePaymentResultSound() {
+        val player = paymentResultPlayer ?: return
+
+        if (player.isPlaying) {
+            player.pause()
+        }
+    }
+
+    private fun enableImmersiveMode() {
         @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
@@ -148,38 +266,7 @@ class MainActivity : ComponentActivity() {
                         View.SYSTEM_UI_FLAG_FULLSCREEN or
                         View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 )
-
-        setContent {
-            OrthodoxCharityApp(
-                paymentResult = paymentResult.value,
-                onClearResult = { paymentResult.value = null },
-                onPayment = { amount ->
-                    posLauncher.launch(buildPaymentIntent(this@MainActivity, amount))
-                },
-                customAmountValue = customAmount.value,
-                onCustomAmountChange = { customAmount.value = it }
-            )
-        }
     }
-
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-
-        if (hasFocus) {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                            View.SYSTEM_UI_FLAG_FULLSCREEN or
-                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    )
-        }
-    }
-
-    @Deprecated("Disabled")
-    override fun onBackPressed() = Unit
 
     private fun readTransactionResult(data: Intent?): TransactionResult? {
         if (data == null) return null
@@ -198,6 +285,8 @@ class MainActivity : ComponentActivity() {
     private fun handlePaymentResult(result: ActivityResult) {
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
             paymentResult.value = PaymentResult.Error
+            customAmount.value = "2000"
+            playPaymentResultSound()
             return
         }
 
@@ -205,6 +294,8 @@ class MainActivity : ComponentActivity() {
 
         if (tx == null) {
             paymentResult.value = PaymentResult.Error
+            customAmount.value = "2000"
+            playPaymentResultSound()
             return
         }
 
@@ -220,6 +311,7 @@ class MainActivity : ComponentActivity() {
         }
 
         customAmount.value = "2000"
+        playPaymentResultSound()
     }
 }
 
@@ -628,59 +720,65 @@ fun DonationActionCard(
             .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(11.dp))
             .then(cardClickModifier)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
+                .padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 4.dp)
         ) {
-            Column {
-                Text(
-                    text = title,
-                    style = TextStyle(
-                        fontFamily = CormorantFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp,
-                        color = GoldDark
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
+            ) {
+                Column {
+                    Text(
+                        text = title,
+                        style = TextStyle(
+                            fontFamily = AlegreyaFontFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 16.sp,
+                            color = GoldDark
+                        )
                     )
-                )
 
-                Text(
-                    text = description,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
-                        fontSize = 14.sp,
-                        color = MutedWarm
+                    Text(
+                        text = description,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = TextStyle(
+                            fontFamily = AlegreyaFontFamily,
+                            fontSize = 12.sp,
+                            color = MutedWarm
+                        )
                     )
-                )
-            }
+                }
 
-            if (showCardDivider) {
-                Spacer(modifier = Modifier.height(3.dp))
+                if (showCardDivider) {
+                    Spacer(modifier = Modifier.height(3.dp))
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CardOrnamentDivider(
+                            modifier = Modifier
+                                .width(120.dp)
+                                .height(12.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(1.dp))
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
 
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CardOrnamentDivider(
-                        modifier = Modifier
-                            .width(120.dp)
-                            .height(12.dp)
-                    )
+                    content()
                 }
-
-                Spacer(modifier = Modifier.height(1.dp))
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                content()
             }
         }
 
@@ -694,11 +792,11 @@ fun DonationActionCard(
 
         Box(
             modifier = Modifier
-                .width(136.dp)
+                .width(140.dp)
                 .fillMaxHeight()
                 .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
                 .scale(actionScale)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .clickable(
                     interactionSource = actionInteraction,
                     indication = null,
@@ -718,11 +816,11 @@ fun DonationActionCard(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 style = TextStyle(
-                    fontFamily = CormorantFontFamily,
+                    fontFamily = AlegreyaFontFamily,
                     fontSize = 14.sp,
                     lineHeight = 14.sp,
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold
                 )
             )
         }
@@ -919,26 +1017,27 @@ fun PaymentResultDialog(
         ) {
             Spacer(modifier = Modifier.height(18.dp))
 
-            Text(
-                text = dialogUi.icon,
-                style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 28.sp,
-                    color = GoldDark
-                )
+            AppOrnamentDivider(
+                modifier = Modifier
+                    .width(190.dp)
+                    .height(18.dp)
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = dialogUi.title,
                 style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
+                    fontFamily = CormorantFontFamily,
                     fontSize = 16.sp,
                     color = GoldDark,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            DialogStatusIcon(result = result)
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -959,19 +1058,26 @@ fun PaymentResultDialog(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
+                    .height(42.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(ActionBrush)
-                    .clickable { onDismiss() }
-                    .padding(vertical = 10.dp),
+                    .clickable { onDismiss() },
                 contentAlignment = Alignment.Center
             ) {
+                Image(
+                    painter = painterResource(id = R.drawable.dialog_close_button_bg),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier.fillMaxSize()
+                )
+
                 Text(
                     text = dialogUi.buttonLabel,
                     style = TextStyle(
                         color = Color.White,
                         fontFamily = AlegreyaFontFamily,
                         fontSize = 13.sp,
-                        letterSpacing = 1.sp
+                        letterSpacing = 1.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 )
             }
@@ -979,6 +1085,24 @@ fun PaymentResultDialog(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+}
+
+@Composable
+private fun DialogStatusIcon(
+    result: PaymentResult
+) {
+    val iconRes = when (result) {
+        is PaymentResult.Success -> R.drawable.dialog_checked
+        is PaymentResult.Declined -> R.drawable.dialog_cancel
+        is PaymentResult.Error -> R.drawable.dialog_cancel
+    }
+
+    Image(
+        painter = painterResource(id = iconRes),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = Modifier.size(64.dp)
+    )
 }
 
 private data class DialogUi(

@@ -1,0 +1,4 @@
+com.orthodox.charity.test.app-androidTest-0 C:\donations\app\build\generated\res\resValues\androidTest\debug
+com.orthodox.charity.test.app-mergeDebugAndroidTestResources-1 C:\donations\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
+com.orthodox.charity.test.app-mergeDebugAndroidTestResources-2 C:\donations\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
+com.orthodox.charity.test.app-merged_res-3 C:\donations\app\build\intermediates\merged_res\debugAndroidTest

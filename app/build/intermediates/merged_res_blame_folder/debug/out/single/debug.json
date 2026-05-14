@@ -1,78 +1,106 @@
 [
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/font_alegreya_italic.ttf.flat",
-        "source": "com.orthodox.charity.app-main-58:/font/alegreya_italic.ttf"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_orthodox_cross_custom.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\orthodox_cross_custom.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/font_alegreya_medium.ttf.flat",
-        "source": "com.orthodox.charity.app-main-58:/font/alegreya_medium.ttf"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_dialog_cancel.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\dialog_cancel.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/xml_device_admin.xml.flat",
-        "source": "com.orthodox.charity.app-main-58:/xml/device_admin.xml"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_alegreya_medium.ttf.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\alegreya_medium.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/font_alegreya_regular.ttf.flat",
-        "source": "com.orthodox.charity.app-main-58:/font/alegreya_regular.ttf"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\mipmap-xxhdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/font_cormorant_bold.ttf.flat",
-        "source": "com.orthodox.charity.app-main-58:/font/cormorant_bold.ttf"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_cross_background.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\cross_background.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_cross_glow_background.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/cross_glow_background.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_alegreya_italic.ttf.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\alegreya_italic.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/font_alegreya_bold.ttf.flat",
-        "source": "com.orthodox.charity.app-main-58:/font/alegreya_bold.ttf"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\mipmap-mdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\mipmap-mdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/mipmap-xxhdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/mipmap-xxhdpi/ic_launcher.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_times_new_roman_regular.ttf.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\times_new_roman_regular.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/font_alegreya_semibold.ttf.flat",
-        "source": "com.orthodox.charity.app-main-58:/font/alegreya_semibold.ttf"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\mipmap-xhdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/font_times_new_roman_regular.ttf.flat",
-        "source": "com.orthodox.charity.app-main-58:/font/times_new_roman_regular.ttf"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_dialog_checked.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\dialog_checked.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_orthodox_cross_custom.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/orthodox_cross_custom.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_cross_glow_background.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\cross_glow_background.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_my_background.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/my_background.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_my_background.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\my_background.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/mipmap-xhdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/mipmap-xhdpi/ic_launcher.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_alegreya_regular.ttf.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\alegreya_regular.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_button_bg.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/button_bg.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_alegreya_bold.ttf.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\alegreya_bold.ttf"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/mipmap-hdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/mipmap-hdpi/ic_launcher.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_dialog_close_button_bg.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\dialog_close_button_bg.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_app_header_divider.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/app_header_divider.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\mipmap-hdpi_ic_launcher.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\mipmap-hdpi\\ic_launcher.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_card_divider.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/card_divider.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_card_divider.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\card_divider.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/mipmap-mdpi_ic_launcher.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/mipmap-mdpi/ic_launcher.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_card_left_plate.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\card_left_plate.png"
     },
     {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_cross_background.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/cross_background.png"
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\raw_main_loop.mp3.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\raw\\main_loop.mp3"
+    },
+    {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_app_header_divider.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\app_header_divider.png"
+    },
+    {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_alegreya_semibold.ttf.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\alegreya_semibold.ttf"
+    },
+    {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_button_bg.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\button_bg.png"
+    },
+    {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\xml_device_admin.xml.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\xml\\device_admin.xml"
+    },
+    {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_card_plate_bg.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\card_plate_bg.png"
+    },
+    {
+        "merged": "com.orthodox.charity.app-merged_res-56:/raw_payment_result.mp3.flat",
+        "source": "com.orthodox.charity.app-main-58:/raw/payment_result.mp3"
+    },
+    {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_cormorant_bold.ttf.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\cormorant_bold.ttf"
     }
 ]

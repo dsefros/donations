@@ -3,8 +3,12 @@ local
 drawable app_header_divider
 drawable button_bg
 drawable card_divider
+drawable card_left_plate
 drawable cross_background
 drawable cross_glow_background
+drawable dialog_cancel
+drawable dialog_checked
+drawable dialog_close_button_bg
 drawable my_background
 drawable orthodox_cross_custom
 font alegreya_bold
@@ -15,5 +19,7 @@ font alegreya_semibold
 font cormorant_bold
 font times_new_roman_regular
 mipmap ic_launcher
+raw main_loop
+raw payment_result
 string app_name
 xml device_admin

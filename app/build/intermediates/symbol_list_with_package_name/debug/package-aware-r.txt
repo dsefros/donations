@@ -2930,6 +2930,7 @@ drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
 drawable button_bg
 drawable card_divider
+drawable card_left_plate
 drawable cross_background
 drawable cross_glow_background
 drawable cursor
@@ -2938,6 +2939,9 @@ drawable design_ic_visibility
 drawable design_ic_visibility_off
 drawable design_password_eye
 drawable design_snackbar_background
+drawable dialog_cancel
+drawable dialog_checked
+drawable dialog_close_button_bg
 drawable ic_arrow_back_black_24
 drawable ic_call_answer
 drawable ic_call_answer_low
@@ -3828,6 +3832,8 @@ layout zxing_barcode_scanner
 layout zxing_capture
 mipmap ic_launcher
 plurals mtrl_badge_content_description
+raw main_loop
+raw payment_result
 raw zxing_beep
 string abc_action_bar_home_description
 string abc_action_bar_up_description
