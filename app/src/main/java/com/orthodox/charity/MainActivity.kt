@@ -58,12 +58,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -571,7 +575,7 @@ fun ButtonsPanel(
             onClick = { onPayment(BigDecimal("1000.00")) },
             content = {
                 Text(
-                    text = "1000 ₽",
+                    text = "1 000 ₽",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     style = TextStyle(
@@ -758,24 +762,29 @@ fun AmountInput(
             BasicTextField(
                 value = value,
                 onValueChange = { input ->
-                    if (input.all(Char::isDigit) && input.length <= 8) {
-                        onValueChange(input)
+                    val digitsOnly = input.filter(Char::isDigit)
+                    val normalized = digitsOnly.trimStart('0').ifEmpty {
+                        if (digitsOnly.isEmpty()) "" else "0"
                     }
+
+                    onValueChange(normalized.take(8))
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                textStyle = amountTextStyle,
-                modifier = Modifier.width(76.dp),
+                visualTransformation = AmountThousandsVisualTransformation(),
+                textStyle = amountTextStyle.copy(textAlign = TextAlign.End),
+                modifier = Modifier.weight(1f),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
+                        contentAlignment = Alignment.CenterEnd
                     ) {
                         if (value.isEmpty()) {
                             Text(
                                 text = "0",
                                 style = amountTextStyle.copy(
-                                    color = MutedWarm.copy(alpha = 0.45f)
+                                    color = MutedWarm.copy(alpha = 0.45f),
+                                    textAlign = TextAlign.End
                                 )
                             )
                         }
@@ -792,6 +801,42 @@ fun AmountInput(
                 style = amountTextStyle
             )
         }
+    }
+}
+
+private fun formatAmountGroups(rawDigits: String): String {
+    if (rawDigits.isEmpty()) return ""
+
+    return buildString {
+        rawDigits.forEachIndexed { index, char ->
+            append(char)
+            val remaining = rawDigits.length - index - 1
+            if (remaining > 0 && remaining % 3 == 0) {
+                append(' ')
+            }
+        }
+    }
+}
+
+private class AmountThousandsVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val raw = text.text
+        val formatted = formatAmountGroups(raw)
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int {
+                val safeOffset = offset.coerceIn(0, raw.length)
+                return formatAmountGroups(raw.take(safeOffset)).length
+            }
+
+            override fun transformedToOriginal(offset: Int): Int {
+                val safeOffset = offset.coerceIn(0, formatted.length)
+                val digitsBefore = formatted.take(safeOffset).count { it.isDigit() }
+                return digitsBefore.coerceIn(0, raw.length)
+            }
+        }
+
+        return TransformedText(AnnotatedString(formatted), offsetMapping)
     }
 }
 
