@@ -826,17 +826,37 @@ private class AmountThousandsVisualTransformation : VisualTransformation {
         val offsetMapping = object : OffsetMapping {
             override fun originalToTransformed(offset: Int): Int {
                 val safeOffset = offset.coerceIn(0, raw.length)
-                return formatAmountGroups(raw.take(safeOffset)).length
+
+                if (safeOffset == 0) return 0
+
+                var digitsSeen = 0
+
+                formatted.forEachIndexed { index, char ->
+                    if (char.isDigit()) {
+                        digitsSeen++
+
+                        if (digitsSeen == safeOffset) {
+                            return index + 1
+                        }
+                    }
+                }
+
+                return formatted.length
             }
 
             override fun transformedToOriginal(offset: Int): Int {
                 val safeOffset = offset.coerceIn(0, formatted.length)
-                val digitsBefore = formatted.take(safeOffset).count { it.isDigit() }
-                return digitsBefore.coerceIn(0, raw.length)
+                return formatted
+                    .take(safeOffset)
+                    .count { it.isDigit() }
+                    .coerceIn(0, raw.length)
             }
         }
 
-        return TransformedText(AnnotatedString(formatted), offsetMapping)
+        return TransformedText(
+            text = AnnotatedString(formatted),
+            offsetMapping = offsetMapping
+        )
     }
 }
 
