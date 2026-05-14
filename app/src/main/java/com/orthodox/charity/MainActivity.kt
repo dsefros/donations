@@ -1,10 +1,6 @@
 package com.orthodox.charity
 
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.media.MediaPlayer
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -73,10 +69,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.skytech.smartskyposlib.TransactionParams
-import com.skytech.smartskyposlib.TransactionResult
-import com.skytech.smartskyposlib.ui.PaymentActivity
-import com.skytech.smartskyposlib.ui.SkyPaymentActivityV2
+import com.orthodox.charity.audio.AppAudioController
+import com.orthodox.charity.payment.AppPaymentResult
+import com.orthodox.charity.payment.PaymentGateway
+import com.orthodox.charity.payment.SkyTechPaymentGateway
 import java.math.BigDecimal
 import kotlinx.coroutines.delay
 
@@ -85,9 +81,6 @@ private val GoldDark = Color(0xFF8A6A30)
 private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
-
-private const val MAIN_LOOP_VOLUME = 0.35f
-private const val PAYMENT_RESULT_VOLUME = 0.75f
 
 private val ActionBrush = Brush.horizontalGradient(
     listOf(
@@ -112,25 +105,12 @@ private val CormorantFontFamily = FontFamily(
     Font(R.font.cormorant_bold, FontWeight.Bold)
 )
 
-fun buildPaymentIntent(context: Context, amount: BigDecimal): Intent =
-    Intent(context, SkyPaymentActivityV2::class.java).apply {
-        putExtra(PaymentActivity.PARAMS_KEY, TransactionParams(amount))
-        putExtra(PaymentActivity.TYPE_KEY, PaymentActivity.TYPE_PAYMENT)
-    }
-
-sealed class PaymentResult {
-    object Success : PaymentResult()
-    object Declined : PaymentResult()
-    object Error : PaymentResult()
-}
-
 class MainActivity : ComponentActivity() {
-
-    private var mainLoopPlayer: MediaPlayer? = null
-    private var paymentResultPlayer: MediaPlayer? = null
-
-    private val paymentResult = mutableStateOf<PaymentResult?>(null)
+    private val paymentGateway: PaymentGateway = SkyTechPaymentGateway()
+    private val audioController = AppAudioController()
+    private val paymentResult = mutableStateOf<AppPaymentResult?>(null)
     private val customAmount = mutableStateOf("2000")
+    private val paymentInProgress = mutableStateOf(false)
 
     private val posLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -141,7 +121,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        prepareMainLoopPlayer()
+        audioController.prepareMainLoop(this)
 
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
@@ -155,11 +135,14 @@ class MainActivity : ComponentActivity() {
                 paymentResult = paymentResult.value,
                 onClearResult = { paymentResult.value = null },
                 onPayment = { amount ->
-                    pauseMainLoop()
-                    posLauncher.launch(buildPaymentIntent(this@MainActivity, amount))
+                    if (paymentInProgress.value) return@OrthodoxCharityApp
+                    paymentInProgress.value = true
+                    audioController.pauseMainLoop()
+                    posLauncher.launch(paymentGateway.buildPaymentIntent(this@MainActivity, amount))
                 },
                 customAmountValue = customAmount.value,
-                onCustomAmountChange = { customAmount.value = it }
+                onCustomAmountChange = { customAmount.value = it },
+                paymentInProgress = paymentInProgress.value
             )
         }
     }
@@ -167,24 +150,17 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
 
-        if (paymentResultPlayer?.isPlaying != true) {
-            startMainLoop()
-        }
+        audioController.startMainLoop()
     }
 
     override fun onPause() {
-        pauseMainLoop()
-        pausePaymentResultSound()
+        audioController.pauseMainLoop()
+        audioController.pausePaymentResult()
         super.onPause()
     }
 
     override fun onDestroy() {
-        paymentResultPlayer?.release()
-        paymentResultPlayer = null
-
-        mainLoopPlayer?.release()
-        mainLoopPlayer = null
-
+        audioController.release()
         super.onDestroy()
     }
 
@@ -199,63 +175,6 @@ class MainActivity : ComponentActivity() {
     @Deprecated("Disabled")
     override fun onBackPressed() = Unit
 
-    private fun prepareMainLoopPlayer() {
-        if (mainLoopPlayer != null) return
-
-        mainLoopPlayer = MediaPlayer.create(this, R.raw.main_loop)?.apply {
-            isLooping = true
-            setVolume(MAIN_LOOP_VOLUME, MAIN_LOOP_VOLUME)
-        }
-    }
-
-    private fun startMainLoop() {
-        val player = mainLoopPlayer ?: return
-
-        if (!player.isPlaying) {
-            player.start()
-        }
-    }
-
-    private fun pauseMainLoop() {
-        val player = mainLoopPlayer ?: return
-
-        if (player.isPlaying) {
-            player.pause()
-        }
-    }
-
-    private fun playPaymentResultSound() {
-        pauseMainLoop()
-
-        paymentResultPlayer?.release()
-        paymentResultPlayer = null
-
-        paymentResultPlayer = MediaPlayer.create(this, R.raw.payment_result)?.apply {
-            isLooping = false
-            setVolume(PAYMENT_RESULT_VOLUME, PAYMENT_RESULT_VOLUME)
-
-            setOnCompletionListener { completedPlayer ->
-                completedPlayer.release()
-
-                if (paymentResultPlayer === completedPlayer) {
-                    paymentResultPlayer = null
-                }
-
-                startMainLoop()
-            }
-
-            start()
-        }
-    }
-
-    private fun pausePaymentResultSound() {
-        val player = paymentResultPlayer ?: return
-
-        if (player.isPlaying) {
-            player.pause()
-        }
-    }
-
     private fun enableImmersiveMode() {
         @Suppress("DEPRECATION")
         window.decorView.systemUiVisibility = (
@@ -268,60 +187,28 @@ class MainActivity : ComponentActivity() {
                 )
     }
 
-    private fun readTransactionResult(data: Intent?): TransactionResult? {
-        if (data == null) return null
-
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            data.getParcelableExtra(
-                PaymentActivity.RESULT_KEY,
-                TransactionResult::class.java
-            )
-        } else {
-            @Suppress("DEPRECATION")
-            data.getParcelableExtra(PaymentActivity.RESULT_KEY)
-        }
-    }
-
     private fun handlePaymentResult(result: ActivityResult) {
+        paymentInProgress.value = false
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
-            paymentResult.value = PaymentResult.Error
+            paymentResult.value = AppPaymentResult.Error
             customAmount.value = "2000"
-            playPaymentResultSound()
+            audioController.playPaymentResult(this, restartMainLoopAfterCompletion = true)
             return
         }
-
-        val tx = readTransactionResult(result.data)
-
-        if (tx == null) {
-            paymentResult.value = PaymentResult.Error
-            customAmount.value = "2000"
-            playPaymentResultSound()
-            return
-        }
-
-        val code = tx.code
-        val rc = tx.rc ?: ""
-
-        val approved = code == 0 && rc == "00"
-
-        paymentResult.value = if (approved) {
-            PaymentResult.Success
-        } else {
-            PaymentResult.Declined
-        }
-
+        paymentResult.value = paymentGateway.mapTransactionResult(result.data)
         customAmount.value = "2000"
-        playPaymentResultSound()
+        audioController.playPaymentResult(this, restartMainLoopAfterCompletion = true)
     }
 }
 
 @Composable
 fun OrthodoxCharityApp(
-    paymentResult: PaymentResult?,
+    paymentResult: AppPaymentResult?,
     onClearResult: () -> Unit,
     onPayment: (BigDecimal) -> Unit,
     customAmountValue: String,
-    onCustomAmountChange: (String) -> Unit
+    onCustomAmountChange: (String) -> Unit,
+    paymentInProgress: Boolean
 ) {
     Box(
         modifier = Modifier
@@ -379,7 +266,8 @@ fun OrthodoxCharityApp(
                         .fillMaxHeight(),
                     customAmount = customAmountValue,
                     onAmountChange = onCustomAmountChange,
-                    onPayment = onPayment
+                    onPayment = onPayment,
+                    paymentInProgress = paymentInProgress
                 )
             }
 
@@ -602,7 +490,8 @@ fun ButtonsPanel(
     modifier: Modifier = Modifier,
     customAmount: String,
     onAmountChange: (String) -> Unit,
-    onPayment: (BigDecimal) -> Unit
+    onPayment: (BigDecimal) -> Unit,
+    paymentInProgress: Boolean
 ) {
     Column(
         modifier = modifier.padding(top = 2.dp)
@@ -613,9 +502,10 @@ fun ButtonsPanel(
             actionLabel = "ВНЕСТИ ЛЕПТУ",
             showCardDivider = false,
             clickWholeCard = false,
+            enabled = !paymentInProgress,
             onClick = {
-                val parsed = customAmount.toBigDecimalOrNull()
-                if (parsed != null && parsed > BigDecimal.ZERO) {
+                val parsed = parseDonationAmount(customAmount)
+                if (!paymentInProgress && parsed != null) {
                     onPayment(parsed)
                 }
             },
@@ -640,7 +530,10 @@ fun ButtonsPanel(
             actionLabel = "ПОЖЕРТВОВАТЬ",
             showCardDivider = true,
             clickWholeCard = true,
-            onClick = { onPayment(BigDecimal("500.00")) },
+            enabled = !paymentInProgress,
+            onClick = {
+                if (!paymentInProgress) onPayment(BigDecimal("500.00"))
+            },
             content = {
                 Text(
                     text = "500 ₽",
@@ -664,7 +557,10 @@ fun ButtonsPanel(
             actionLabel = "ПОЖЕРТВОВАТЬ",
             showCardDivider = true,
             clickWholeCard = true,
-            onClick = { onPayment(BigDecimal("1000.00")) },
+            enabled = !paymentInProgress,
+            onClick = {
+                if (!paymentInProgress) onPayment(BigDecimal("1000.00"))
+            },
             content = {
                 Text(
                     text = "1 000 ₽",
@@ -689,6 +585,7 @@ fun DonationActionCard(
     actionLabel: String,
     showCardDivider: Boolean = false,
     clickWholeCard: Boolean,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -703,6 +600,7 @@ fun DonationActionCard(
 
     val cardClickModifier = if (clickWholeCard) {
         Modifier.clickable(
+            enabled = enabled,
             interactionSource = interaction,
             indication = null,
             onClick = onClick
@@ -798,6 +696,7 @@ fun DonationActionCard(
                 .scale(actionScale)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable(
+                    enabled = enabled,
                     interactionSource = actionInteraction,
                     indication = null,
                     onClick = onClick
@@ -860,12 +759,7 @@ fun AmountInput(
             BasicTextField(
                 value = value,
                 onValueChange = { input ->
-                    val digitsOnly = input.filter { it.isDigit() }
-                    val normalized = digitsOnly.trimStart('0').ifEmpty {
-                        if (digitsOnly.isEmpty()) "" else "0"
-                    }
-
-                    onValueChange(normalized.take(8))
+                    onValueChange(normalizeAmountInput(input))
                 },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -916,6 +810,18 @@ private fun formatAmountGroups(rawDigits: String): String {
     }
 }
 
+private fun normalizeAmountInput(input: String): String {
+    val digitsOnly = input.filter { it.isDigit() }
+    val normalized = digitsOnly.trimStart('0').ifEmpty { if (digitsOnly.isEmpty()) "" else "0" }
+    return normalized.take(8)
+}
+
+private fun parseDonationAmount(input: String): BigDecimal? {
+    val normalized = normalizeAmountInput(input)
+    val parsed = normalized.toBigDecimalOrNull() ?: return null
+    return parsed.takeIf { it > BigDecimal.ZERO }
+}
+
 private class AmountThousandsVisualTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val raw = text.text
@@ -960,7 +866,7 @@ private class AmountThousandsVisualTransformation : VisualTransformation {
 
 @Composable
 fun PaymentResultDialog(
-    result: PaymentResult,
+    result: AppPaymentResult,
     onDismiss: () -> Unit
 ) {
     LaunchedEffect(result) {
@@ -969,21 +875,21 @@ fun PaymentResultDialog(
     }
 
     val dialogUi = when (result) {
-        is PaymentResult.Success -> DialogUi(
+        AppPaymentResult.Success -> DialogUi(
             icon = "☩",
             title = "ПОЖЕРТВОВАНИЕ ПРИНЯТО",
             message = "Спасибо за ваш вклад",
             buttonLabel = "ЗАКРЫТЬ"
         )
 
-        is PaymentResult.Declined -> DialogUi(
+        AppPaymentResult.Declined -> DialogUi(
             icon = "✕",
             title = "ПОЖЕРТВОВАНИЕ НЕ ПРИНЯТО",
             message = "Пожертвование не было списано. Попробуйте ещё раз",
             buttonLabel = "ЗАКРЫТЬ"
         )
 
-        is PaymentResult.Error -> DialogUi(
+        AppPaymentResult.Error -> DialogUi(
             icon = "!",
             title = "ОШИБКА",
             message = "Не удалось выполнить оплату. Попробуйте ещё раз",
@@ -1089,12 +995,12 @@ fun PaymentResultDialog(
 
 @Composable
 private fun DialogStatusIcon(
-    result: PaymentResult
+    result: AppPaymentResult
 ) {
     val iconRes = when (result) {
-        is PaymentResult.Success -> R.drawable.dialog_checked
-        is PaymentResult.Declined -> R.drawable.dialog_cancel
-        is PaymentResult.Error -> R.drawable.dialog_cancel
+        AppPaymentResult.Success -> R.drawable.dialog_checked
+        AppPaymentResult.Declined -> R.drawable.dialog_cancel
+        AppPaymentResult.Error -> R.drawable.dialog_cancel
     }
 
     Image(

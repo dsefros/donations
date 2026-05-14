@@ -19,6 +19,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // TODO: Before production release, remove debug signing and configure a secure release keystore outside Git.
+            // TODO: Enable signingConfig release for production builds.
             signingConfig signingConfigs.debug
         }
         debug {
@@ -42,6 +44,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion '1.5.10'
     }
+}
+
+def smartSkyAar = file('libs/SmartSkyPosLib_v1.9.17.aar')
+if (!smartSkyAar.exists()) {
+    throw new GradleException('Missing SmartSkyPosLib_v1.9.17.aar. Put it into app/libs/ before building.')
 }
 
 dependencies {
