@@ -189,6 +189,7 @@ class MainActivity : ComponentActivity() {
                         mainLoopVolume = newSettings.mainLoopVolume,
                         paymentResultVolume = newSettings.paymentResultVolume
                     )
+                    audioController.startMainLoop()
                 }
             )
         }
@@ -1146,21 +1147,37 @@ fun SettingsPinDialog(onSuccess: () -> Unit, onDismiss: () -> Unit) {
         ) {
             Text("ВВЕДИТЕ PIN", style = TextStyle(fontFamily = CormorantFontFamily, fontSize = 20.sp, color = GoldDark))
             Spacer(modifier = Modifier.height(12.dp))
-            BasicTextField(value = pin.value, onValueChange = {
-                val v = it.filter(Char::isDigit).take(4)
-                pin.value = v
-                error.value = null
-                if (v.length == 4) {
-                    if (v == SETTINGS_PIN) onSuccess() else { error.value = "Неверный пароль"; pin.value = "" }
-                }
-            },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
-                visualTransformation = PasswordVisualTransformation(),
-                textStyle = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 24.sp, textAlign = TextAlign.Center, color = TextMain),
-                modifier = Modifier.fillMaxWidth())
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)), RoundedCornerShape(8.dp))
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
+            ) {
+                BasicTextField(value = pin.value, onValueChange = {
+                    val v = it.filter(Char::isDigit).take(4)
+                    pin.value = v
+                    error.value = null
+                    if (v.length == 4) {
+                        if (v == SETTINGS_PIN) onSuccess() else { error.value = "Неверный пароль"; pin.value = "" }
+                    }
+                },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    visualTransformation = PasswordVisualTransformation(),
+                    textStyle = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 24.sp, textAlign = TextAlign.Center, color = TextMain),
+                    modifier = Modifier.fillMaxWidth())
+            }
             if (error.value != null) Text(error.value!!, color = Color.Red, fontSize = 13.sp)
-            Spacer(modifier = Modifier.height(12.dp))
-            Text("ЗАКРЫТЬ", modifier = Modifier.clickable { onDismiss() }, style = TextStyle(fontFamily = AlegreyaFontFamily, color = GoldDark))
+            Spacer(modifier = Modifier.height(14.dp))
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(8.dp))
+                    .clickable { onDismiss() }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text("ЗАКРЫТЬ", style = TextStyle(fontFamily = AlegreyaFontFamily, color = GoldDark, fontWeight = FontWeight.SemiBold))
+            }
         }
     }
 }
@@ -1205,15 +1222,23 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
             SettingsAmountField("Своя сумма по умолчанию", custom.value) { custom.value = normalizeAmountInput(it) }
             SettingsAmountField("Помощь храму", temple.value) { temple.value = normalizeAmountInput(it) }
             SettingsAmountField("Детский приют", orphan.value) { orphan.value = normalizeAmountInput(it) }
+            Spacer(modifier = Modifier.height(4.dp))
             Row(verticalAlignment = Alignment.CenterVertically) { Text("Фоновый звук", modifier = Modifier.weight(1f)); Switch(checked = mainEnabled.value, onCheckedChange = { mainEnabled.value = it }) }
             Text("Громкость фонового звука: ${(mainVol.value * 100).toInt()}%")
             Slider(value = mainVol.value, onValueChange = { mainVol.value = it }, valueRange = 0f..1f)
+            Spacer(modifier = Modifier.height(6.dp))
             Row(verticalAlignment = Alignment.CenterVertically) { Text("Звук результата оплаты", modifier = Modifier.weight(1f)); Switch(checked = payEnabled.value, onCheckedChange = { payEnabled.value = it }) }
             Text("Громкость результата оплаты: ${(payVol.value * 100).toInt()}%")
             Slider(value = payVol.value, onValueChange = { payVol.value = it }, valueRange = 0f..1f)
+            Spacer(modifier = Modifier.height(8.dp))
             error.value?.let { Text(it, color = Color.Red, fontSize = 13.sp) }
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("СОХРАНИТЬ", modifier = Modifier.clickable {
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(8.dp))
+                        .clickable {
                     val c = normalizeAmountInput(custom.value)
                     val t = normalizeAmountInput(temple.value)
                     val o = normalizeAmountInput(orphan.value)
@@ -1222,8 +1247,20 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
                     } else {
                         onSave(DonationSettings(c, t, o, mainEnabled.value, payEnabled.value, mainVol.value, payVol.value)); onDismiss()
                     }
-                })
-                Text("ЗАКРЫТЬ", modifier = Modifier.clickable { onDismiss() })
+                }
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Text("СОХРАНИТЬ", style = TextStyle(fontFamily = AlegreyaFontFamily, color = GoldDark, fontWeight = FontWeight.SemiBold))
+                }
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(8.dp))
+                        .clickable { onDismiss() }
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
+                ) {
+                    Text("ЗАКРЫТЬ", style = TextStyle(fontFamily = AlegreyaFontFamily, color = GoldDark, fontWeight = FontWeight.SemiBold))
+                }
             }
         }
     }

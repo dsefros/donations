@@ -87,8 +87,9 @@ class AppAudioController {
     }
 
     fun pausePaymentResult() {
-        val player = paymentResultPlayer ?: return
-        safeRun { if (player.isPlaying) player.pause() }
+        safeRun { paymentResultPlayer?.stop() }
+        safeRun { paymentResultPlayer?.release() }
+        paymentResultPlayer = null
     }
 
     fun release() {
