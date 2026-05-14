@@ -67,8 +67,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -80,9 +82,9 @@ import com.orthodox.charity.payment.SkyTechPaymentGateway
 import com.orthodox.charity.settings.AppSettingsStorage
 import com.orthodox.charity.settings.DonationSettings
 import java.math.BigDecimal
-import kotlinx.coroutines.delay
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.verticalScroll
+import kotlinx.coroutines.delay
 
 private val BgMain = Color(0xFFF5F3F1)
 private val GoldDark = Color(0xFF8A6A30)
@@ -579,14 +581,7 @@ fun ButtonsPanel(
     onAmountChange: (String) -> Unit,
     onPayment: (BigDecimal) -> Unit,
     paymentInProgress: Boolean,
-    settings: DonationSettings,
-    showSettingsPinDialog: Boolean,
-    showSettingsDialog: Boolean,
-    onCrossTripleTap: () -> Unit,
-    onDismissPinDialog: () -> Unit,
-    onPinSuccess: () -> Unit,
-    onDismissSettings: () -> Unit,
-    onSaveSettings: (DonationSettings) -> Unit
+    settings: DonationSettings
 ) {
     Column(
         modifier = modifier.padding(top = 2.dp)
@@ -627,7 +622,9 @@ fun ButtonsPanel(
             clickWholeCard = true,
             enabled = !paymentInProgress,
             onClick = {
-                if (!paymentInProgress) onPayment(BigDecimal(settings.templeAmount))
+                if (!paymentInProgress) {
+                    parseDonationAmount(settings.templeAmount)?.let(onPayment)
+                }
             },
             content = {
                 Text(
@@ -654,7 +651,9 @@ fun ButtonsPanel(
             clickWholeCard = true,
             enabled = !paymentInProgress,
             onClick = {
-                if (!paymentInProgress) onPayment(BigDecimal(settings.orphanageAmount))
+                if (!paymentInProgress) {
+                    parseDonationAmount(settings.orphanageAmount)?.let(onPayment)
+                }
             },
             content = {
                 Text(
@@ -1123,7 +1122,13 @@ fun SettingsPinDialog(onSuccess: () -> Unit, onDismiss: () -> Unit) {
     val error = remember { mutableStateOf<String?>(null) }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.35f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onDismiss() },
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -1132,6 +1137,10 @@ fun SettingsPinDialog(onSuccess: () -> Unit, onDismiss: () -> Unit) {
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White)
                 .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {}
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -1144,7 +1153,9 @@ fun SettingsPinDialog(onSuccess: () -> Unit, onDismiss: () -> Unit) {
                 if (v.length == 4) {
                     if (v == SETTINGS_PIN) onSuccess() else { error.value = "Неверный пароль"; pin.value = "" }
                 }
-            }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+            },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                visualTransformation = PasswordVisualTransformation(),
                 textStyle = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 24.sp, textAlign = TextAlign.Center, color = TextMain),
                 modifier = Modifier.fillMaxWidth())
             if (error.value != null) Text(error.value!!, color = Color.Red, fontSize = 13.sp)
@@ -1164,18 +1175,36 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
     val mainVol = remember { mutableStateOf(settings.mainLoopVolume) }
     val payVol = remember { mutableStateOf(settings.paymentResultVolume) }
     val error = remember { mutableStateOf<String?>(null) }
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.35f)), contentAlignment = Alignment.Center) {
-        Column(modifier = Modifier.widthIn(max = 360.dp).fillMaxWidth().padding(12.dp)
-            .clip(RoundedCornerShape(12.dp)).background(Color.White).border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
-            .padding(14.dp).verticalScroll(rememberScrollState())) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.35f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onDismiss() },
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 360.dp)
+                .fillMaxWidth()
+                .padding(12.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White)
+                .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {}
+                .padding(14.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             Text("НАСТРОЙКИ", style = TextStyle(fontFamily = CormorantFontFamily, fontSize = 20.sp, color = GoldDark), modifier = Modifier.align(Alignment.CenterHorizontally))
-            fun amountField(label:String,state: androidx.compose.runtime.MutableState<String>) {
-                Text(label, style = TextStyle(fontFamily = AlegreyaFontFamily, color = TextMain, fontSize = 14.sp))
-                BasicTextField(value = state.value, onValueChange = { state.value = normalizeAmountInput(it) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), singleLine = true)
-            }
-            amountField("Своя сумма по умолчанию", custom)
-            amountField("Помощь храму", temple)
-            amountField("Детский приют", orphan)
+            Spacer(modifier = Modifier.height(10.dp))
+            SettingsAmountField("Своя сумма по умолчанию", custom.value) { custom.value = normalizeAmountInput(it) }
+            SettingsAmountField("Помощь храму", temple.value) { temple.value = normalizeAmountInput(it) }
+            SettingsAmountField("Детский приют", orphan.value) { orphan.value = normalizeAmountInput(it) }
             Row(verticalAlignment = Alignment.CenterVertically) { Text("Фоновый звук", modifier = Modifier.weight(1f)); Switch(checked = mainEnabled.value, onCheckedChange = { mainEnabled.value = it }) }
             Text("Громкость фонового звука: ${(mainVol.value * 100).toInt()}%")
             Slider(value = mainVol.value, onValueChange = { mainVol.value = it }, valueRange = 0f..1f)
@@ -1197,5 +1226,30 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
                 Text("ЗАКРЫТЬ", modifier = Modifier.clickable { onDismiss() })
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsAmountField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    Text(label, style = TextStyle(fontFamily = AlegreyaFontFamily, color = TextMain, fontSize = 14.sp))
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp, bottom = 8.dp)
+            .clip(RoundedCornerShape(7.dp))
+            .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)), RoundedCornerShape(7.dp))
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+    ) {
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            textStyle = TextStyle(fontFamily = AlegreyaFontFamily, color = TextMain, fontSize = 16.sp)
+        )
     }
 }

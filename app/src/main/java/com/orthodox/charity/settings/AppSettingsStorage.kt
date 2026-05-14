@@ -7,12 +7,9 @@ class AppSettingsStorage(context: Context) {
 
     fun load(): DonationSettings {
         return DonationSettings(
-            customDefaultAmount = prefs.getString(KEY_CUSTOM_DEFAULT_AMOUNT, "2000")?.filter { it.isDigit() }
-                ?.ifEmpty { "2000" } ?: "2000",
-            templeAmount = prefs.getString(KEY_TEMPLE_AMOUNT, "500")?.filter { it.isDigit() }
-                ?.ifEmpty { "500" } ?: "500",
-            orphanageAmount = prefs.getString(KEY_ORPHANAGE_AMOUNT, "1000")?.filter { it.isDigit() }
-                ?.ifEmpty { "1000" } ?: "1000",
+            customDefaultAmount = sanitizeAmount(prefs.getString(KEY_CUSTOM_DEFAULT_AMOUNT, null), "2000"),
+            templeAmount = sanitizeAmount(prefs.getString(KEY_TEMPLE_AMOUNT, null), "500"),
+            orphanageAmount = sanitizeAmount(prefs.getString(KEY_ORPHANAGE_AMOUNT, null), "1000"),
             mainLoopSoundEnabled = prefs.getBoolean(KEY_MAIN_LOOP_SOUND_ENABLED, true),
             paymentResultSoundEnabled = prefs.getBoolean(KEY_PAYMENT_RESULT_SOUND_ENABLED, true),
             mainLoopVolume = prefs.getFloat(KEY_MAIN_LOOP_VOLUME, 0.35f).coerceIn(0f, 1f),
@@ -22,14 +19,20 @@ class AppSettingsStorage(context: Context) {
 
     fun save(settings: DonationSettings) {
         prefs.edit()
-            .putString(KEY_CUSTOM_DEFAULT_AMOUNT, settings.customDefaultAmount.filter { it.isDigit() })
-            .putString(KEY_TEMPLE_AMOUNT, settings.templeAmount.filter { it.isDigit() })
-            .putString(KEY_ORPHANAGE_AMOUNT, settings.orphanageAmount.filter { it.isDigit() })
+            .putString(KEY_CUSTOM_DEFAULT_AMOUNT, sanitizeAmount(settings.customDefaultAmount, "2000"))
+            .putString(KEY_TEMPLE_AMOUNT, sanitizeAmount(settings.templeAmount, "500"))
+            .putString(KEY_ORPHANAGE_AMOUNT, sanitizeAmount(settings.orphanageAmount, "1000"))
             .putBoolean(KEY_MAIN_LOOP_SOUND_ENABLED, settings.mainLoopSoundEnabled)
             .putBoolean(KEY_PAYMENT_RESULT_SOUND_ENABLED, settings.paymentResultSoundEnabled)
             .putFloat(KEY_MAIN_LOOP_VOLUME, settings.mainLoopVolume.coerceIn(0f, 1f))
             .putFloat(KEY_PAYMENT_RESULT_VOLUME, settings.paymentResultVolume.coerceIn(0f, 1f))
             .apply()
+    }
+
+    private fun sanitizeAmount(raw: String?, fallback: String): String {
+        val digits = raw.orEmpty().filter { it.isDigit() }
+        val normalized = digits.trimStart('0').ifEmpty { "" }
+        return normalized.takeIf { it.isNotBlank() && it != "0" } ?: fallback
     }
 
     private companion object {

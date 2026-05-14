@@ -64,7 +64,13 @@ class AppAudioController {
             return
         }
 
-        paymentResultPlayer = MediaPlayer.create(context, R.raw.payment_result)?.apply {
+        val player = MediaPlayer.create(context, R.raw.payment_result)
+        if (player == null) {
+            if (restartMainLoopAfterCompletion) startMainLoop()
+            return
+        }
+
+        paymentResultPlayer = player.apply {
             isLooping = false
             setVolume(paymentResultVolume, paymentResultVolume)
             setOnCompletionListener { completed ->
