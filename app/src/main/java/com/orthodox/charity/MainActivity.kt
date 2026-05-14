@@ -762,7 +762,7 @@ fun AmountInput(
             BasicTextField(
                 value = value,
                 onValueChange = { input ->
-                    val digitsOnly = input.filter(Char::isDigit)
+                    val digitsOnly = input.filter { it.isDigit() }
                     val normalized = digitsOnly.trimStart('0').ifEmpty {
                         if (digitsOnly.isEmpty()) "" else "0"
                     }
@@ -772,19 +772,19 @@ fun AmountInput(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 visualTransformation = AmountThousandsVisualTransformation(),
-                textStyle = amountTextStyle.copy(textAlign = TextAlign.End),
+                textStyle = amountTextStyle.copy(textAlign = TextAlign.Center),
                 modifier = Modifier.weight(1f),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd
+                        contentAlignment = Alignment.Center
                     ) {
                         if (value.isEmpty()) {
                             Text(
                                 text = "0",
                                 style = amountTextStyle.copy(
                                     color = MutedWarm.copy(alpha = 0.45f),
-                                    textAlign = TextAlign.End
+                                    textAlign = TextAlign.Center
                                 )
                             )
                         }
