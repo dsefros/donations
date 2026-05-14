@@ -11,6 +11,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -97,6 +98,10 @@ private val AlegreyaFontFamily = FontFamily(
 
 private val TimesNewRomanFontFamily = FontFamily(
     Font(R.font.times_new_roman_regular, FontWeight.Normal)
+)
+
+private val CormorantFontFamily = FontFamily(
+    Font(R.font.cormorant_bold, FontWeight.Bold)
 )
 
 fun buildPaymentIntent(context: Context, amount: BigDecimal): Intent =
@@ -248,18 +253,12 @@ fun OrthodoxCharityApp(
                 }
         )
 
-        Image(
-            painter = painterResource(id = R.drawable.cross_glow_background),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
+        AnimatedCrossGlow(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .offset(x = (-4).dp, y = (-56).dp)
                 .width(150.dp)
                 .height(250.dp)
-                .graphicsLayer {
-                    alpha = 0.85f
-                }
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -308,6 +307,64 @@ fun OrthodoxCharityApp(
 }
 
 @Composable
+private fun AnimatedCrossGlow(
+    modifier: Modifier = Modifier
+) {
+    val transition = rememberInfiniteTransition(label = "cross_glow_breathe")
+
+    val glowAlpha by transition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 0.92f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cross_glow_alpha"
+    )
+
+    val glowScale by transition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1.06f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cross_glow_scale"
+    )
+
+    val glowOffsetY by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = -3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 3800,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cross_glow_offset_y"
+    )
+
+    Image(
+        painter = painterResource(id = R.drawable.cross_glow_background),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = modifier.graphicsLayer {
+            alpha = glowAlpha
+            scaleX = glowScale
+            scaleY = glowScale
+            translationY = glowOffsetY
+        }
+    )
+}
+
+@Composable
 fun AppHeader() {
     Column(
         modifier = Modifier
@@ -318,10 +375,9 @@ fun AppHeader() {
         Text(
             text = "ПРАВОСЛАВНАЯ БЛАГОТВОРИТЕЛЬНОСТЬ",
             style = TextStyle(
-                fontFamily = AlegreyaFontFamily,
-                fontSize = 16.sp,
-                letterSpacing = 1.8.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontFamily = CormorantFontFamily,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
                 color = GoldDark
             )
         )
@@ -484,7 +540,7 @@ fun ButtonsPanel(
 
         DonationActionCard(
             title = "ПОМОЩЬ ХРАМУ",
-            description = "Восстановление и нужды церкви",
+            description = "Нужды церкви",
             actionLabel = "ПОЖЕРТВОВАТЬ",
             showCardDivider = true,
             clickWholeCard = true,
@@ -578,8 +634,8 @@ fun DonationActionCard(
                 Text(
                     text = title,
                     style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
-                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = CormorantFontFamily,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = GoldDark
                     )
@@ -591,7 +647,7 @@ fun DonationActionCard(
                     overflow = TextOverflow.Ellipsis,
                     style = TextStyle(
                         fontFamily = AlegreyaFontFamily,
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         color = MutedWarm
                     )
                 )
@@ -634,11 +690,11 @@ fun DonationActionCard(
 
         Box(
             modifier = Modifier
-                .width(120.dp)
+                .width(136.dp)
                 .fillMaxHeight()
                 .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
                 .scale(actionScale)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .clickable(
                     interactionSource = actionInteraction,
                     indication = null,
@@ -658,11 +714,11 @@ fun DonationActionCard(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
+                    fontFamily = CormorantFontFamily,
                     fontSize = 14.sp,
                     lineHeight = 14.sp,
                     color = Color.White,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
             )
         }
@@ -753,7 +809,7 @@ fun PaymentResultDialog(
         is PaymentResult.Success -> DialogUi(
             icon = "☩",
             title = "ПОЖЕРТВОВАНИЕ ПРИНЯТО",
-            message = "Спасибо за ваше пожертвование",
+            message = "Спасибо за ваш вклад",
             buttonLabel = "ЗАКРЫТЬ"
         )
 

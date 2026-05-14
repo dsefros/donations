@@ -12,6 +12,7 @@ font alegreya_italic
 font alegreya_medium
 font alegreya_regular
 font alegreya_semibold
+font cormorant_bold
 font times_new_roman_regular
 mipmap ic_launcher
 string app_name

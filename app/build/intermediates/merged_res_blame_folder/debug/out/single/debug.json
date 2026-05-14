@@ -12,6 +12,10 @@
         "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\alegreya_medium.ttf"
     },
     {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_card_divider.png.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\card_divider.png"
+    },
+    {
         "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\mipmap-xxhdpi_ic_launcher.png.flat",
         "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\mipmap-xxhdpi\\ic_launcher.png"
     },
@@ -22,6 +26,10 @@
     {
         "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\drawable_cross_background.png.flat",
         "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\drawable\\cross_background.png"
+    },
+    {
+        "merged": "com.orthodox.charity.app-merged_res-56:/font_cormorant_bold.ttf.flat",
+        "source": "com.orthodox.charity.app-main-58:/font/cormorant_bold.ttf"
     },
     {
         "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_alegreya_italic.ttf.flat",
@@ -66,9 +74,5 @@
     {
         "merged": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-merged_res-56:\\font_alegreya_bold.ttf.flat",
         "source": "C:\\Users\\user\\.gradle\\daemon\\8.6\\com.orthodox.charity.app-main-58:\\font\\alegreya_bold.ttf"
-    },
-    {
-        "merged": "com.orthodox.charity.app-merged_res-56:/drawable_card_divider.png.flat",
-        "source": "com.orthodox.charity.app-main-58:/drawable/card_divider.png"
     }
 ]
