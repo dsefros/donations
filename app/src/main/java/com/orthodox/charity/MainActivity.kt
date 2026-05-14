@@ -493,7 +493,30 @@ fun CardOrnamentDivider(
 @Composable
 fun CrossPanel(modifier: Modifier = Modifier, onCrossTripleTap: () -> Unit) {
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .pointerInput(Unit) {
+                var tapCount = 0
+                var lastTapTs = 0L
+
+                detectTapGestures(
+                    onTap = {
+                        val now = SystemClock.elapsedRealtime()
+
+                        tapCount = if (now - lastTapTs > SETTINGS_TRIPLE_TAP_TIMEOUT_MS) {
+                            1
+                        } else {
+                            tapCount + 1
+                        }
+
+                        lastTapTs = now
+
+                        if (tapCount >= 3) {
+                            tapCount = 0
+                            onCrossTripleTap()
+                        }
+                    }
+                )
+            },
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -503,8 +526,7 @@ fun CrossPanel(modifier: Modifier = Modifier, onCrossTripleTap: () -> Unit) {
             Spacer(modifier = Modifier.height(72.dp))
 
             ShimmeringCross(
-                modifier = Modifier.size(width = 98.dp, height = 160.dp),
-                onCrossTripleTap = onCrossTripleTap
+                modifier = Modifier.size(width = 98.dp, height = 160.dp)
             )
 
             Spacer(modifier = Modifier.height(56.dp))
@@ -538,7 +560,7 @@ fun CrossPanel(modifier: Modifier = Modifier, onCrossTripleTap: () -> Unit) {
 }
 
 @Composable
-fun ShimmeringCross(modifier: Modifier = Modifier, onCrossTripleTap: () -> Unit) {
+fun ShimmeringCross(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "cross_breathe")
 
     val breatheAlpha by transition.animateFloat(
@@ -555,21 +577,7 @@ fun ShimmeringCross(modifier: Modifier = Modifier, onCrossTripleTap: () -> Unit)
         painter = painterResource(id = R.drawable.orthodox_cross_custom),
         contentDescription = "Православный крест",
         contentScale = ContentScale.Fit,
-        modifier = modifier
-            .pointerInput(Unit) {
-                var tapCount = 0
-                var lastTapTs = 0L
-                detectTapGestures(onTap = {
-                    val now = SystemClock.elapsedRealtime()
-                    tapCount = if (now - lastTapTs > SETTINGS_TRIPLE_TAP_TIMEOUT_MS) 1 else tapCount + 1
-                    lastTapTs = now
-                    if (tapCount >= 3) {
-                        tapCount = 0
-                        onCrossTripleTap()
-                    }
-                })
-            }
-            .graphicsLayer {
+        modifier = modifier.graphicsLayer {
                 alpha = breatheAlpha
             }
     )
@@ -1115,7 +1123,7 @@ private data class DialogUi(
 
 
 private const val SETTINGS_PIN = "1234"
-private const val SETTINGS_TRIPLE_TAP_TIMEOUT_MS = 700L
+private const val SETTINGS_TRIPLE_TAP_TIMEOUT_MS = 1000L
 
 @Composable
 fun SettingsPinDialog(onSuccess: () -> Unit, onDismiss: () -> Unit) {
