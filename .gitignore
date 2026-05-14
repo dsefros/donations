@@ -1,1 +1,24 @@
+# Gradle / Android build
+.gradle/
+build/
+*/build/
+
+# Local Android Studio / Gradle files
+local.properties
+*.iml
+.idea/
+
+# Android outputs
+*.apk
+*.aab
+
+# Signing keys
+*.jks
+*.keystore
+
+# Local AAR libraries
 app/libs/*.aar
+
+# OS files
+.DS_Store
+Thumbs.db
