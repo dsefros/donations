@@ -806,7 +806,7 @@ fun PaymentResultDialog(
         is PaymentResult.Success -> DialogUi(
             icon = "☩",
             title = "ПОЖЕРТВОВАНИЕ ПРИНЯТО",
-            message = "Спасибо за ваше пожертвование",
+            message = "Спасибо за ваш вклад",
             buttonLabel = "ЗАКРЫТЬ"
         )
 
