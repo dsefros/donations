@@ -8,15 +8,41 @@ class AppAudioController {
     private var mainLoopPlayer: MediaPlayer? = null
     private var paymentResultPlayer: MediaPlayer? = null
 
+    private var mainLoopEnabled: Boolean = true
+    private var paymentResultEnabled: Boolean = true
+    private var mainLoopVolume: Float = 0.35f
+    private var paymentResultVolume: Float = 0.75f
+
+    fun updateSettings(
+        mainLoopEnabled: Boolean,
+        paymentResultEnabled: Boolean,
+        mainLoopVolume: Float,
+        paymentResultVolume: Float
+    ) {
+        this.mainLoopEnabled = mainLoopEnabled
+        this.paymentResultEnabled = paymentResultEnabled
+        this.mainLoopVolume = mainLoopVolume.coerceIn(0f, 1f)
+        this.paymentResultVolume = paymentResultVolume.coerceIn(0f, 1f)
+
+        safeRun { mainLoopPlayer?.setVolume(this.mainLoopVolume, this.mainLoopVolume) }
+        safeRun { paymentResultPlayer?.setVolume(this.paymentResultVolume, this.paymentResultVolume) }
+
+        if (!this.mainLoopEnabled) {
+            pauseMainLoop()
+        }
+    }
+
     fun prepareMainLoop(context: Context) {
         if (mainLoopPlayer != null) return
         mainLoopPlayer = MediaPlayer.create(context, R.raw.main_loop)?.apply {
             isLooping = true
-            setVolume(MAIN_LOOP_VOLUME, MAIN_LOOP_VOLUME)
+            setVolume(mainLoopVolume, mainLoopVolume)
         }
     }
 
     fun startMainLoop() {
+        if (!mainLoopEnabled) return
+        if (isPaymentResultPlaying()) return
         val player = mainLoopPlayer ?: return
         safeRun { if (!player.isPlaying) player.start() }
     }
@@ -31,9 +57,16 @@ class AppAudioController {
         safeRun { paymentResultPlayer?.release() }
         paymentResultPlayer = null
 
+        if (!paymentResultEnabled) {
+            if (restartMainLoopAfterCompletion) {
+                startMainLoop()
+            }
+            return
+        }
+
         paymentResultPlayer = MediaPlayer.create(context, R.raw.payment_result)?.apply {
             isLooping = false
-            setVolume(PAYMENT_RESULT_VOLUME, PAYMENT_RESULT_VOLUME)
+            setVolume(paymentResultVolume, paymentResultVolume)
             setOnCompletionListener { completed ->
                 safeRun { completed.release() }
                 if (paymentResultPlayer === completed) {
@@ -59,15 +92,19 @@ class AppAudioController {
         mainLoopPlayer = null
     }
 
+    private fun isPaymentResultPlaying(): Boolean {
+        val player = paymentResultPlayer ?: return false
+        return try {
+            player.isPlaying
+        } catch (_: IllegalStateException) {
+            false
+        }
+    }
+
     private inline fun safeRun(action: () -> Unit) {
         try {
             action()
         } catch (_: IllegalStateException) {
         }
-    }
-
-    private companion object {
-        const val MAIN_LOOP_VOLUME = 0.35f
-        const val PAYMENT_RESULT_VOLUME = 0.75f
     }
 }
