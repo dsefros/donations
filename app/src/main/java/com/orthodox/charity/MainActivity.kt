@@ -502,6 +502,7 @@ fun ButtonsPanel(
             actionLabel = "ВНЕСТИ ЛЕПТУ",
             showCardDivider = false,
             clickWholeCard = false,
+            enabled = !paymentInProgress,
             onClick = {
                 val parsed = parseDonationAmount(customAmount)
                 if (!paymentInProgress && parsed != null) {
@@ -529,6 +530,7 @@ fun ButtonsPanel(
             actionLabel = "ПОЖЕРТВОВАТЬ",
             showCardDivider = true,
             clickWholeCard = true,
+            enabled = !paymentInProgress,
             onClick = {
                 if (!paymentInProgress) onPayment(BigDecimal("500.00"))
             },
@@ -555,6 +557,7 @@ fun ButtonsPanel(
             actionLabel = "ПОЖЕРТВОВАТЬ",
             showCardDivider = true,
             clickWholeCard = true,
+            enabled = !paymentInProgress,
             onClick = {
                 if (!paymentInProgress) onPayment(BigDecimal("1000.00"))
             },
@@ -582,6 +585,7 @@ fun DonationActionCard(
     actionLabel: String,
     showCardDivider: Boolean = false,
     clickWholeCard: Boolean,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -596,6 +600,7 @@ fun DonationActionCard(
 
     val cardClickModifier = if (clickWholeCard) {
         Modifier.clickable(
+            enabled = enabled,
             interactionSource = interaction,
             indication = null,
             onClick = onClick
@@ -691,6 +696,7 @@ fun DonationActionCard(
                 .scale(actionScale)
                 .clip(RoundedCornerShape(10.dp))
                 .clickable(
+                    enabled = enabled,
                     interactionSource = actionInteraction,
                     indication = null,
                     onClick = onClick
@@ -869,21 +875,21 @@ fun PaymentResultDialog(
     }
 
     val dialogUi = when (result) {
-        is AppPaymentResult.Success -> DialogUi(
+        AppPaymentResult.Success -> DialogUi(
             icon = "☩",
             title = "ПОЖЕРТВОВАНИЕ ПРИНЯТО",
             message = "Спасибо за ваш вклад",
             buttonLabel = "ЗАКРЫТЬ"
         )
 
-        is AppPaymentResult.Declined -> DialogUi(
+        AppPaymentResult.Declined -> DialogUi(
             icon = "✕",
             title = "ПОЖЕРТВОВАНИЕ НЕ ПРИНЯТО",
             message = "Пожертвование не было списано. Попробуйте ещё раз",
             buttonLabel = "ЗАКРЫТЬ"
         )
 
-        is AppPaymentResult.Error -> DialogUi(
+        AppPaymentResult.Error -> DialogUi(
             icon = "!",
             title = "ОШИБКА",
             message = "Не удалось выполнить оплату. Попробуйте ещё раз",
@@ -989,12 +995,12 @@ fun PaymentResultDialog(
 
 @Composable
 private fun DialogStatusIcon(
-    result: PaymentResult
+    result: AppPaymentResult
 ) {
     val iconRes = when (result) {
-        is PaymentResult.Success -> R.drawable.dialog_checked
-        is PaymentResult.Declined -> R.drawable.dialog_cancel
-        is PaymentResult.Error -> R.drawable.dialog_cancel
+        AppPaymentResult.Success -> R.drawable.dialog_checked
+        AppPaymentResult.Declined -> R.drawable.dialog_cancel
+        AppPaymentResult.Error -> R.drawable.dialog_cancel
     }
 
     Image(
