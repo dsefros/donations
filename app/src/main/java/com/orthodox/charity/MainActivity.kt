@@ -100,6 +100,10 @@ private val TimesNewRomanFontFamily = FontFamily(
     Font(R.font.times_new_roman_regular, FontWeight.Normal)
 )
 
+private val CormorantFontFamily = FontFamily(
+    Font(R.font.cormorant_bold, FontWeight.Bold)
+)
+
 fun buildPaymentIntent(context: Context, amount: BigDecimal): Intent =
     Intent(context, SkyPaymentActivityV2::class.java).apply {
         putExtra(PaymentActivity.PARAMS_KEY, TransactionParams(amount))
@@ -371,10 +375,9 @@ fun AppHeader() {
         Text(
             text = "ПРАВОСЛАВНАЯ БЛАГОТВОРИТЕЛЬНОСТЬ",
             style = TextStyle(
-                fontFamily = AlegreyaFontFamily,
-                fontSize = 16.sp,
-                letterSpacing = 1.8.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontFamily = CormorantFontFamily,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
                 color = GoldDark
             )
         )
@@ -537,7 +540,7 @@ fun ButtonsPanel(
 
         DonationActionCard(
             title = "ПОМОЩЬ ХРАМУ",
-            description = "Восстановление и нужды церкви",
+            description = "Нужды церкви",
             actionLabel = "ПОЖЕРТВОВАТЬ",
             showCardDivider = true,
             clickWholeCard = true,
@@ -631,8 +634,8 @@ fun DonationActionCard(
                 Text(
                     text = title,
                     style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
-                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = CormorantFontFamily,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
                         color = GoldDark
                     )
@@ -644,7 +647,7 @@ fun DonationActionCard(
                     overflow = TextOverflow.Ellipsis,
                     style = TextStyle(
                         fontFamily = AlegreyaFontFamily,
-                        fontSize = 12.sp,
+                        fontSize = 14.sp,
                         color = MutedWarm
                     )
                 )
@@ -687,11 +690,11 @@ fun DonationActionCard(
 
         Box(
             modifier = Modifier
-                .width(120.dp)
+                .width(136.dp)
                 .fillMaxHeight()
                 .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
                 .scale(actionScale)
-                .clip(RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .clickable(
                     interactionSource = actionInteraction,
                     indication = null,
@@ -711,11 +714,11 @@ fun DonationActionCard(
                 textAlign = TextAlign.Center,
                 maxLines = 2,
                 style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
+                    fontFamily = CormorantFontFamily,
                     fontSize = 14.sp,
                     lineHeight = 14.sp,
                     color = Color.White,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
             )
         }
