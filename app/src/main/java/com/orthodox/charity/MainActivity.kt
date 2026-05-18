@@ -9,31 +9,21 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -53,8 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -72,7 +60,6 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orthodox.charity.audio.AppAudioController
@@ -83,6 +70,9 @@ import com.orthodox.charity.settings.AppSettingsStorage
 import com.orthodox.charity.settings.DonationSettings
 import java.math.BigDecimal
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import kotlinx.coroutines.delay
 
@@ -91,13 +81,6 @@ private val GoldDark = Color(0xFF8A6A30)
 private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
-
-private val ActionBrush = Brush.horizontalGradient(
-    listOf(
-        Color(0xFF9D7C3D),
-        Color(0xFFB99653)
-    )
-)
 
 private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_regular, FontWeight.Normal),
@@ -123,6 +106,7 @@ class MainActivity : ComponentActivity() {
     private val donationSettings = mutableStateOf(DonationSettings())
     private val showSettingsPinDialog = mutableStateOf(false)
     private val showSettingsDialog = mutableStateOf(false)
+    private val showSettingsQuickPanel = mutableStateOf(false)
     private val customAmount = mutableStateOf("2000")
     private val paymentInProgress = mutableStateOf(false)
 
@@ -170,8 +154,14 @@ class MainActivity : ComponentActivity() {
                 settings = donationSettings.value,
                 showSettingsPinDialog = showSettingsPinDialog.value,
                 showSettingsDialog = showSettingsDialog.value,
-                onCrossTripleTap = {
-                    if (!paymentInProgress.value) showSettingsPinDialog.value = true
+                showSettingsQuickPanel = showSettingsQuickPanel.value,
+                onHiddenSettingsTripleTap = {
+                    if (!paymentInProgress.value) showSettingsQuickPanel.value = true
+                },
+                onDismissSettingsQuickPanel = { showSettingsQuickPanel.value = false },
+                onOpenSettingsFromQuickPanel = {
+                    showSettingsQuickPanel.value = false
+                    showSettingsPinDialog.value = true
                 },
                 onDismissPinDialog = { showSettingsPinDialog.value = false },
                 onPinSuccess = {
@@ -260,7 +250,10 @@ fun OrthodoxCharityApp(
     settings: DonationSettings,
     showSettingsPinDialog: Boolean,
     showSettingsDialog: Boolean,
-    onCrossTripleTap: () -> Unit,
+    showSettingsQuickPanel: Boolean,
+    onHiddenSettingsTripleTap: () -> Unit,
+    onDismissSettingsQuickPanel: () -> Unit,
+    onOpenSettingsFromQuickPanel: () -> Unit,
     onDismissPinDialog: () -> Unit,
     onPinSuccess: () -> Unit,
     onDismissSettings: () -> Unit,
@@ -278,69 +271,39 @@ fun OrthodoxCharityApp(
             modifier = Modifier.fillMaxSize()
         )
 
-        Image(
-            painter = painterResource(id = R.drawable.cross_background),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = (-66).dp, y = (-44).dp)
-                .width(280.dp)
-                .height(320.dp)
-                .graphicsLayer {
-                    alpha = 1f
-                }
-        )
-
-        AnimatedCrossGlow(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = (-4).dp, y = (-56).dp)
-                .width(150.dp)
-                .height(250.dp)
-        )
-
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             AppHeader()
-
-            Row(
+            DonationCarouselPanel(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                CrossPanel(
-                    modifier = Modifier
-                        .width(130.dp)
-                        .fillMaxHeight(),
-                    onCrossTripleTap = onCrossTripleTap
-                )
-
-                ButtonsPanel(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    customAmount = customAmountValue,
-                    onAmountChange = onCustomAmountChange,
-                    onPayment = onPayment,
-                    paymentInProgress = paymentInProgress,
-                    settings = settings
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                AppOrnamentDivider()
-            }
+                    .fillMaxWidth(),
+                settings = settings,
+                customAmount = customAmountValue,
+                onAmountChange = onCustomAmountChange,
+                paymentInProgress = paymentInProgress,
+                onPayment = onPayment
+            )
+            PsalmFooter()
+            Spacer(modifier = Modifier.height(14.dp))
         }
 
+        HiddenSettingsHotspot(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .size(96.dp),
+            enabled = !paymentInProgress,
+            onTripleTap = onHiddenSettingsTripleTap
+        )
 
-
+        if (showSettingsQuickPanel) {
+            SettingsQuickPanel(
+                onOpenSettings = onOpenSettingsFromQuickPanel,
+                onDismiss = onDismissSettingsQuickPanel
+            )
+        }
         if (showSettingsPinDialog) {
             SettingsPinDialog(
                 onSuccess = onPinSuccess,
@@ -365,63 +328,6 @@ fun OrthodoxCharityApp(
     }
 }
 
-@Composable
-private fun AnimatedCrossGlow(
-    modifier: Modifier = Modifier
-) {
-    val transition = rememberInfiniteTransition(label = "cross_glow_breathe")
-
-    val glowAlpha by transition.animateFloat(
-        initialValue = 0.55f,
-        targetValue = 0.92f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 3800,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "cross_glow_alpha"
-    )
-
-    val glowScale by transition.animateFloat(
-        initialValue = 0.96f,
-        targetValue = 1.06f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 3800,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "cross_glow_scale"
-    )
-
-    val glowOffsetY by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = -3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 3800,
-                easing = FastOutSlowInEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "cross_glow_offset_y"
-    )
-
-    Image(
-        painter = painterResource(id = R.drawable.cross_glow_background),
-        contentDescription = null,
-        contentScale = ContentScale.Fit,
-        modifier = modifier.graphicsLayer {
-            alpha = glowAlpha
-            scaleX = glowScale
-            scaleY = glowScale
-            translationY = glowOffsetY
-        }
-    )
-}
 
 @Composable
 fun AppHeader() {
@@ -432,31 +338,42 @@ fun AppHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "ПРАВОСЛАВНАЯ БЛАГОТВОРИТЕЛЬНОСТЬ",
+            text = "ПРАВОСЛАВНАЯ\nБЛАГОТВОРИТЕЛЬНОСТЬ",
+            textAlign = TextAlign.Center,
             style = TextStyle(
                 fontFamily = CormorantFontFamily,
-                fontSize = 20.sp,
+                fontSize = 21.sp,
                 fontWeight = FontWeight.Bold,
                 color = GoldDark
             )
         )
-
-        Spacer(modifier = Modifier.height(3.dp))
-
-        Text(
-            text = "Помогите ближнему своему",
-            style = TextStyle(
-                fontFamily = AlegreyaFontFamily,
-                fontSize = 13.sp,
-                letterSpacing = 1.sp,
-                color = MutedWarm
-            )
-        )
-
         Spacer(modifier = Modifier.height(6.dp))
 
         AppOrnamentDivider()
     }
+}
+
+private enum class DonationCardType { Custom, Temple, Orphanage }
+private data class DonationCarouselItem(
+    val title: String,
+    val description: String,
+    val amountText: String?,
+    val actionLabel: String,
+    val type: DonationCardType
+)
+
+@Composable
+private fun PsalmFooter() {
+    Text(
+        text = "«Блажен, кто думает о бедном и нищем» - Псалом 40:1",
+        textAlign = TextAlign.Center,
+        style = TextStyle(
+            fontFamily = AlegreyaFontFamily,
+            fontStyle = FontStyle.Italic,
+            color = GoldDark,
+            fontSize = 13.sp
+        )
+    )
 }
 
 @Composable
@@ -490,340 +407,194 @@ fun CardOrnamentDivider(
     )
 }
 
+
 @Composable
-fun CrossPanel(modifier: Modifier = Modifier, onCrossTripleTap: () -> Unit) {
+private fun HiddenSettingsHotspot(
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    onTripleTap: () -> Unit
+) {
     Box(
-        modifier = modifier
-            .pointerInput(Unit) {
-                var tapCount = 0
-                var lastTapTs = 0L
+        modifier = modifier.pointerInput(enabled) {
+            var tapCount = 0
+            var lastTapTs = 0L
+            detectTapGestures(onTap = {
+                if (!enabled) return@detectTapGestures
+                val now = SystemClock.elapsedRealtime()
+                tapCount = if (now - lastTapTs > SETTINGS_TRIPLE_TAP_TIMEOUT_MS) 1 else tapCount + 1
+                lastTapTs = now
+                if (tapCount >= 3) {
+                    tapCount = 0
+                    onTripleTap()
+                }
+            })
+        }
+    )
+}
 
-                detectTapGestures(
-                    onTap = {
-                        val now = SystemClock.elapsedRealtime()
-
-                        tapCount = if (now - lastTapTs > SETTINGS_TRIPLE_TAP_TIMEOUT_MS) {
-                            1
-                        } else {
-                            tapCount + 1
-                        }
-
-                        lastTapTs = now
-
-                        if (tapCount >= 3) {
-                            tapCount = 0
-                            onCrossTripleTap()
-                        }
-                    }
-                )
-            },
-        contentAlignment = Alignment.TopCenter
+@Composable
+private fun SettingsQuickPanel(
+    onOpenSettings: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.18f))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ) { onDismiss() },
+        contentAlignment = Alignment.BottomStart
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Box(
+            modifier = Modifier
+                .padding(start = 16.dp, bottom = 16.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.96f))
+                .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {}
+                .padding(8.dp)
         ) {
-            Spacer(modifier = Modifier.height(72.dp))
-
-            ShimmeringCross(
-                modifier = Modifier.size(width = 98.dp, height = 160.dp)
-            )
-
-            Spacer(modifier = Modifier.height(56.dp))
-
-            Text(
-                text = "«Блажен, кто думает\nо бедном и нищем»",
-                textAlign = TextAlign.Center,
-                style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontStyle = FontStyle.Italic,
-                    color = GoldDark,
-                    fontSize = 12.sp,
-                    lineHeight = 15.sp
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(
+                        BorderStroke(1.dp, BorderGold.copy(alpha = 0.85f)),
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable { onOpenSettings() }
+                    .padding(horizontal = 14.dp, vertical = 9.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "НАСТРОЙКИ",
+                    style = TextStyle(
+                        fontFamily = AlegreyaFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        color = GoldDark,
+                        fontSize = 13.sp
+                    )
                 )
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "— Псалом 40:1",
-                style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 12.sp,
-                    color = MutedWarm
-                )
-            )
-
-            Spacer(modifier = Modifier.weight(1f))
+            }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ShimmeringCross(modifier: Modifier = Modifier) {
-    val transition = rememberInfiniteTransition(label = "cross_breathe")
-
-    val breatheAlpha by transition.animateFloat(
-        initialValue = 0.985f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3200),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "breathe"
-    )
-
-    Image(
-        painter = painterResource(id = R.drawable.orthodox_cross_custom),
-        contentDescription = "Православный крест",
-        contentScale = ContentScale.Fit,
-        modifier = modifier.graphicsLayer {
-                alpha = breatheAlpha
-            }
-    )
-}
-
-@Composable
-fun ButtonsPanel(
+private fun DonationCarouselPanel(
     modifier: Modifier = Modifier,
+    settings: DonationSettings,
     customAmount: String,
     onAmountChange: (String) -> Unit,
-    onPayment: (BigDecimal) -> Unit,
     paymentInProgress: Boolean,
-    settings: DonationSettings
+    onPayment: (BigDecimal) -> Unit
 ) {
-    Column(
-        modifier = modifier.padding(top = 2.dp)
+    val pages = remember(settings) {
+        listOf(
+            DonationCarouselItem("СВОЯ СУММА", "Введите любую сумму", null, "ВНЕСТИ ЛЕПТУ", DonationCardType.Custom),
+            DonationCarouselItem("ПОМОЩЬ ХРАМУ", "Нужды церкви", formatAmountGroups(settings.templeAmount) + " ₽", "ПОЖЕРТВОВАТЬ", DonationCardType.Temple),
+            DonationCarouselItem("ДЕТСКИЙ ПРИЮТ", "Забота о сиротах и детях", formatAmountGroups(settings.orphanageAmount) + " ₽", "ПОЖЕРТВОВАТЬ", DonationCardType.Orphanage)
+        )
+    }
+    val pagerState = rememberPagerState(pageCount = { pages.size })
+    LaunchedEffect(pagerState, paymentInProgress, pages.size) {
+        while (true) {
+            delay(60_000)
+            if (!paymentInProgress && pages.isNotEmpty()) {
+                pagerState.animateScrollToPage((pagerState.currentPage + 1) % pages.size)
+            }
+        }
+    }
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
+            val item = pages[page]
+            DonationCarouselCard(
+                item = item,
+                customAmount = customAmount,
+                onAmountChange = onAmountChange,
+                paymentInProgress = paymentInProgress,
+                onClick = {
+                    if (paymentInProgress) return@DonationCarouselCard
+                    when (item.type) {
+                        DonationCardType.Custom -> parseDonationAmount(customAmount)?.let(onPayment)
+                        DonationCardType.Temple -> parseDonationAmount(settings.templeAmount)?.let(onPayment)
+                        DonationCardType.Orphanage -> parseDonationAmount(settings.orphanageAmount)?.let(onPayment)
+                    }
+                }
+            )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        CarouselPageIndicator(pageCount = pages.size, currentPage = pagerState.currentPage)
+    }
+}
+
+
+
+@Composable
+private fun DonationCarouselCard(
+    item: DonationCarouselItem,
+    customAmount: String,
+    onAmountChange: (String) -> Unit,
+    paymentInProgress: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp)
+            .height(282.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color(0xFFF8F5EE))
+            .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(20.dp))
+            .padding(20.dp)
     ) {
-        DonationActionCard(
-            title = "СВОЯ СУММА",
-            description = "Введите любую сумму",
-            actionLabel = "ВНЕСТИ ЛЕПТУ",
-            showCardDivider = false,
-            clickWholeCard = false,
-            enabled = !paymentInProgress,
-            onClick = {
-                val parsed = parseDonationAmount(customAmount)
-                if (!paymentInProgress && parsed != null) {
-                    onPayment(parsed)
-                }
-            },
-            content = {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AmountInput(
-                        value = customAmount,
-                        onValueChange = onAmountChange
-                    )
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        DonationActionCard(
-            title = "ПОМОЩЬ ХРАМУ",
-            description = "Нужды церкви",
-            actionLabel = "ПОЖЕРТВОВАТЬ",
-            showCardDivider = true,
-            clickWholeCard = true,
-            enabled = !paymentInProgress,
-            onClick = {
-                if (!paymentInProgress) {
-                    parseDonationAmount(settings.templeAmount)?.let(onPayment)
-                }
-            },
-            content = {
+        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(item.title, style = TextStyle(fontFamily = AlegreyaFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, color = GoldDark), textAlign = TextAlign.Center)
+            Text(item.description, style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 16.sp, color = MutedWarm), textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(8.dp))
+            CardOrnamentDivider()
+            Spacer(modifier = Modifier.height(10.dp))
+            if (item.type == DonationCardType.Custom) {
+                AmountInput(value = customAmount, onValueChange = onAmountChange)
+            } else {
                 Text(
-                    text = formatAmountGroups(settings.templeAmount) + " ₽",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = TimesNewRomanFontFamily,
-                        fontSize = 30.sp,
-                        color = TextMain,
-                        fontWeight = FontWeight.Normal
-                    )
+                    text = item.amountText.orEmpty(),
+                    style = TextStyle(fontFamily = TimesNewRomanFontFamily, fontSize = 52.sp, color = TextMain)
                 )
             }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        DonationActionCard(
-            title = "ДЕТСКИЙ ПРИЮТ",
-            description = "Забота о сиротах и детях",
-            actionLabel = "ПОЖЕРТВОВАТЬ",
-            showCardDivider = true,
-            clickWholeCard = true,
-            enabled = !paymentInProgress,
-            onClick = {
-                if (!paymentInProgress) {
-                    parseDonationAmount(settings.orphanageAmount)?.let(onPayment)
-                }
-            },
-            content = {
-                Text(
-                    text = formatAmountGroups(settings.orphanageAmount) + " ₽",
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = TimesNewRomanFontFamily,
-                        fontSize = 30.sp,
-                        color = TextMain,
-                        fontWeight = FontWeight.Normal
-                    )
-                )
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(78.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(enabled = !paymentInProgress, onClick = onClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(painter = painterResource(id = R.drawable.button_bg), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                Text(item.actionLabel, style = TextStyle(fontFamily = AlegreyaFontFamily, fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 17.sp))
             }
-        )
+        }
     }
 }
 
 @Composable
-fun DonationActionCard(
-    title: String,
-    description: String,
-    actionLabel: String,
-    showCardDivider: Boolean = false,
-    clickWholeCard: Boolean,
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-    content: @Composable () -> Unit
+private fun CarouselPageIndicator(
+    pageCount: Int,
+    currentPage: Int
 ) {
-    val interaction = remember { MutableInteractionSource() }
-    val isPressed by interaction.collectIsPressedAsState()
-
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.985f else 1f,
-        animationSpec = spring(stiffness = 700f),
-        label = "card_scale"
-    )
-
-    val cardClickModifier = if (clickWholeCard) {
-        Modifier.clickable(
-            enabled = enabled,
-            interactionSource = interaction,
-            indication = null,
-            onClick = onClick
-        )
-    } else {
-        Modifier
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(108.dp)
-            .scale(scale)
-            .clip(RoundedCornerShape(11.dp))
-            .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(11.dp))
-            .then(cardClickModifier)
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(start = 4.dp, top = 4.dp, end = 4.dp, bottom = 4.dp)
-        ) {
-            Column(
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        repeat(pageCount) { index ->
+            Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
-            ) {
-                Column {
-                    Text(
-                        text = title,
-                        style = TextStyle(
-                            fontFamily = AlegreyaFontFamily,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 16.sp,
-                            color = GoldDark
-                        )
-                    )
-
-                    Text(
-                        text = description,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        style = TextStyle(
-                            fontFamily = AlegreyaFontFamily,
-                            fontSize = 12.sp,
-                            color = MutedWarm
-                        )
-                    )
-                }
-
-                if (showCardDivider) {
-                    Spacer(modifier = Modifier.height(3.dp))
-
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CardOrnamentDivider(
-                            modifier = Modifier
-                                .width(120.dp)
-                                .height(12.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(1.dp))
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    content()
-                }
-            }
-        }
-
-        val actionInteraction = remember { MutableInteractionSource() }
-        val actionPressed by actionInteraction.collectIsPressedAsState()
-
-        val actionScale by animateFloatAsState(
-            targetValue = if (actionPressed) 0.985f else 1f,
-            label = "action_scale"
-        )
-
-        Box(
-            modifier = Modifier
-                .width(140.dp)
-                .fillMaxHeight()
-                .padding(top = 4.dp, end = 4.dp, bottom = 4.dp)
-                .scale(actionScale)
-                .clip(RoundedCornerShape(10.dp))
-                .clickable(
-                    enabled = enabled,
-                    interactionSource = actionInteraction,
-                    indication = null,
-                    onClick = onClick
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.button_bg),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-
-            Text(
-                text = actionLabel,
-                textAlign = TextAlign.Center,
-                maxLines = 2,
-                style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.SemiBold
-                )
+                    .size(14.dp)
+                    .clip(CircleShape)
+                    .background(if (index == currentPage) GoldDark else BorderGold.copy(alpha = 0.45f))
             )
         }
     }
