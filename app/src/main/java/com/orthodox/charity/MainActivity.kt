@@ -83,6 +83,9 @@ import com.orthodox.charity.settings.AppSettingsStorage
 import com.orthodox.charity.settings.DonationSettings
 import java.math.BigDecimal
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import kotlinx.coroutines.delay
 
@@ -123,6 +126,7 @@ class MainActivity : ComponentActivity() {
     private val donationSettings = mutableStateOf(DonationSettings())
     private val showSettingsPinDialog = mutableStateOf(false)
     private val showSettingsDialog = mutableStateOf(false)
+    private val showSettingsQuickPanel = mutableStateOf(false)
     private val customAmount = mutableStateOf("2000")
     private val paymentInProgress = mutableStateOf(false)
 
@@ -170,8 +174,14 @@ class MainActivity : ComponentActivity() {
                 settings = donationSettings.value,
                 showSettingsPinDialog = showSettingsPinDialog.value,
                 showSettingsDialog = showSettingsDialog.value,
-                onCrossTripleTap = {
-                    if (!paymentInProgress.value) showSettingsPinDialog.value = true
+                showSettingsQuickPanel = showSettingsQuickPanel.value,
+                onHiddenSettingsTripleTap = {
+                    if (!paymentInProgress.value) showSettingsQuickPanel.value = true
+                },
+                onDismissSettingsQuickPanel = { showSettingsQuickPanel.value = false },
+                onOpenSettingsFromQuickPanel = {
+                    showSettingsQuickPanel.value = false
+                    showSettingsPinDialog.value = true
                 },
                 onDismissPinDialog = { showSettingsPinDialog.value = false },
                 onPinSuccess = {
@@ -260,7 +270,10 @@ fun OrthodoxCharityApp(
     settings: DonationSettings,
     showSettingsPinDialog: Boolean,
     showSettingsDialog: Boolean,
-    onCrossTripleTap: () -> Unit,
+    showSettingsQuickPanel: Boolean,
+    onHiddenSettingsTripleTap: () -> Unit,
+    onDismissSettingsQuickPanel: () -> Unit,
+    onOpenSettingsFromQuickPanel: () -> Unit,
     onDismissPinDialog: () -> Unit,
     onPinSuccess: () -> Unit,
     onDismissSettings: () -> Unit,
@@ -278,69 +291,39 @@ fun OrthodoxCharityApp(
             modifier = Modifier.fillMaxSize()
         )
 
-        Image(
-            painter = painterResource(id = R.drawable.cross_background),
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = (-66).dp, y = (-44).dp)
-                .width(280.dp)
-                .height(320.dp)
-                .graphicsLayer {
-                    alpha = 1f
-                }
-        )
-
-        AnimatedCrossGlow(
-            modifier = Modifier
-                .align(Alignment.CenterStart)
-                .offset(x = (-4).dp, y = (-56).dp)
-                .width(150.dp)
-                .height(250.dp)
-        )
-
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             AppHeader()
-
-            Row(
+            DonationCarouselPanel(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 2.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                CrossPanel(
-                    modifier = Modifier
-                        .width(130.dp)
-                        .fillMaxHeight(),
-                    onCrossTripleTap = onCrossTripleTap
-                )
-
-                ButtonsPanel(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    customAmount = customAmountValue,
-                    onAmountChange = onCustomAmountChange,
-                    onPayment = onPayment,
-                    paymentInProgress = paymentInProgress,
-                    settings = settings
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                AppOrnamentDivider()
-            }
+                    .fillMaxWidth(),
+                settings = settings,
+                customAmount = customAmountValue,
+                onAmountChange = onCustomAmountChange,
+                paymentInProgress = paymentInProgress,
+                onPayment = onPayment
+            )
+            PsalmFooter()
+            Spacer(modifier = Modifier.height(14.dp))
         }
 
+        HiddenSettingsHotspot(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .size(96.dp),
+            enabled = !paymentInProgress,
+            onTripleTap = onHiddenSettingsTripleTap
+        )
 
-
+        if (showSettingsQuickPanel) {
+            SettingsQuickPanel(
+                onOpenSettings = onOpenSettingsFromQuickPanel,
+                onDismiss = onDismissSettingsQuickPanel
+            )
+        }
         if (showSettingsPinDialog) {
             SettingsPinDialog(
                 onSuccess = onPinSuccess,
@@ -432,31 +415,42 @@ fun AppHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "ПРАВОСЛАВНАЯ БЛАГОТВОРИТЕЛЬНОСТЬ",
+            text = "ПРАВОСЛАВНАЯ\nБЛАГОТВОРИТЕЛЬНОСТЬ",
+            textAlign = TextAlign.Center,
             style = TextStyle(
                 fontFamily = CormorantFontFamily,
-                fontSize = 20.sp,
+                fontSize = 21.sp,
                 fontWeight = FontWeight.Bold,
                 color = GoldDark
             )
         )
-
-        Spacer(modifier = Modifier.height(3.dp))
-
-        Text(
-            text = "Помогите ближнему своему",
-            style = TextStyle(
-                fontFamily = AlegreyaFontFamily,
-                fontSize = 13.sp,
-                letterSpacing = 1.sp,
-                color = MutedWarm
-            )
-        )
-
         Spacer(modifier = Modifier.height(6.dp))
 
         AppOrnamentDivider()
     }
+}
+
+private enum class DonationCardType { Custom, Temple, Orphanage }
+private data class DonationCarouselItem(
+    val title: String,
+    val description: String,
+    val amountText: String?,
+    val actionLabel: String,
+    val type: DonationCardType
+)
+
+@Composable
+private fun PsalmFooter() {
+    Text(
+        text = "«Блажен, кто думает о бедном и нищем» - Псалом 40:1",
+        textAlign = TextAlign.Center,
+        style = TextStyle(
+            fontFamily = AlegreyaFontFamily,
+            fontStyle = FontStyle.Italic,
+            color = GoldDark,
+            fontSize = 13.sp
+        )
+    )
 }
 
 @Composable
@@ -582,6 +576,109 @@ fun ShimmeringCross(modifier: Modifier = Modifier) {
             }
     )
 }
+
+@Composable
+private fun HiddenSettingsHotspot(
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    onTripleTap: () -> Unit
+) {
+    Box(
+        modifier = modifier.pointerInput(enabled) {
+            var tapCount = 0
+            var lastTapTs = 0L
+            detectTapGestures(onTap = {
+                if (!enabled) return@detectTapGestures
+                val now = SystemClock.elapsedRealtime()
+                tapCount = if (now - lastTapTs > SETTINGS_TRIPLE_TAP_TIMEOUT_MS) 1 else tapCount + 1
+                lastTapTs = now
+                if (tapCount >= 3) {
+                    tapCount = 0
+                    onTripleTap()
+                }
+            })
+        }
+    )
+}
+
+@Composable
+private fun SettingsQuickPanel(
+    onOpenSettings: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Box(modifier = Modifier.fillMaxSize().clickable(onClick = onDismiss)) {
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 20.dp, bottom = 20.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color(0xFFF8F2E6))
+                .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
+                .clickable(onClick = {})
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+        ) {
+            Text(
+                text = "НАСТРОЙКИ",
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    color = GoldDark,
+                    fontSize = 16.sp
+                ),
+                modifier = Modifier.clickable(onClick = onOpenSettings)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DonationCarouselPanel(
+    modifier: Modifier = Modifier,
+    settings: DonationSettings,
+    customAmount: String,
+    onAmountChange: (String) -> Unit,
+    paymentInProgress: Boolean,
+    onPayment: (BigDecimal) -> Unit
+) {
+    val pages = remember(settings) {
+        listOf(
+            DonationCarouselItem("СВОЯ СУММА", "Введите любую сумму", null, "ВНЕСТИ ЛЕПТУ", DonationCardType.Custom),
+            DonationCarouselItem("ПОМОЩЬ ХРАМУ", "Нужды церкви", formatAmountGroups(settings.templeAmount) + " ₽", "ПОЖЕРТВОВАТЬ", DonationCardType.Temple),
+            DonationCarouselItem("ДЕТСКИЙ ПРИЮТ", "Забота о сиротах и детях", formatAmountGroups(settings.orphanageAmount) + " ₽", "ПОЖЕРТВОВАТЬ", DonationCardType.Orphanage)
+        )
+    }
+    val pagerState = rememberPagerState(pageCount = { pages.size })
+    LaunchedEffect(pagerState, paymentInProgress, pages.size) {
+        while (true) {
+            delay(60_000)
+            if (!paymentInProgress && pages.isNotEmpty()) {
+                pagerState.animateScrollToPage((pagerState.currentPage + 1) % pages.size)
+            }
+        }
+    }
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
+            val item = pages[page]
+            DonationCarouselCard(
+                item = item,
+                customAmount = customAmount,
+                onAmountChange = onAmountChange,
+                paymentInProgress = paymentInProgress,
+                onClick = {
+                    if (paymentInProgress) return@DonationCarouselCard
+                    when (item.type) {
+                        DonationCardType.Custom -> parseDonationAmount(customAmount)?.let(onPayment)
+                        DonationCardType.Temple -> parseDonationAmount(settings.templeAmount)?.let(onPayment)
+                        DonationCardType.Orphanage -> parseDonationAmount(settings.orphanageAmount)?.let(onPayment)
+                    }
+                }
+            )
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+        CarouselPageIndicator(pageCount = pages.size, currentPage = pagerState.currentPage)
+    }
+}
+
 
 @Composable
 fun ButtonsPanel(
@@ -824,6 +921,71 @@ fun DonationActionCard(
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold
                 )
+            )
+        }
+    }
+}
+
+@Composable
+private fun DonationCarouselCard(
+    item: DonationCarouselItem,
+    customAmount: String,
+    onAmountChange: (String) -> Unit,
+    paymentInProgress: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp)
+            .height(282.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color(0xFFF8F5EE))
+            .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(20.dp))
+            .padding(20.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(item.title, style = TextStyle(fontFamily = AlegreyaFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, color = GoldDark), textAlign = TextAlign.Center)
+            Text(item.description, style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 16.sp, color = MutedWarm), textAlign = TextAlign.Center)
+            Spacer(modifier = Modifier.height(8.dp))
+            CardOrnamentDivider()
+            Spacer(modifier = Modifier.height(10.dp))
+            if (item.type == DonationCardType.Custom) {
+                AmountInput(value = customAmount, onValueChange = onAmountChange)
+            } else {
+                Text(
+                    text = item.amountText.orEmpty(),
+                    style = TextStyle(fontFamily = TimesNewRomanFontFamily, fontSize = 52.sp, color = TextMain)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(78.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable(enabled = !paymentInProgress, onClick = onClick),
+                contentAlignment = Alignment.Center
+            ) {
+                Image(painter = painterResource(id = R.drawable.button_bg), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                Text(item.actionLabel, style = TextStyle(fontFamily = AlegreyaFontFamily, fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 17.sp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun CarouselPageIndicator(
+    pageCount: Int,
+    currentPage: Int
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        repeat(pageCount) { index ->
+            Box(
+                modifier = Modifier
+                    .size(14.dp)
+                    .clip(CircleShape)
+                    .background(if (index == currentPage) GoldDark else BorderGold.copy(alpha = 0.45f))
             )
         }
     }
