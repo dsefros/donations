@@ -77,6 +77,7 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Shadow
 
 private val BgMain = Color(0xFFF5F3F1)
 private val GoldDark = Color(0xFF8A6A30)
@@ -92,6 +93,13 @@ private val ButtonBorderBrush = Brush.linearGradient(
     ),
     start = Offset.Zero,
     end = Offset.Infinite
+)
+
+private val ButtonTextBrush = Brush.verticalGradient(
+    colorStops = arrayOf(
+        0.0f to Color(0xFFFFFFFF),
+        1.0f to Color(0xFFDECF7C)
+    )
 )
 private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_regular, FontWeight.Normal),
@@ -607,6 +615,7 @@ private fun DonationCarouselCard(
     onClick: () -> Unit
 ) {
     val cardShape = RoundedCornerShape(20.dp)
+    val buttonShape = RoundedCornerShape(20.dp)
 
     Column(
         modifier = modifier
@@ -627,7 +636,10 @@ private fun DonationCarouselCard(
             .padding(start = 8.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -655,79 +667,81 @@ private fun DonationCarouselCard(
 
             CardOrnamentDivider(
                 modifier = Modifier
-                    .width(368.dp)
+                    .fillMaxWidth()
                     .height(21.dp)
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (item.type == DonationCardType.Custom) {
-                AmountInput(
-                    value = customAmount,
-                    onValueChange = onAmountChange
-                )
-            } else {
-                Text(
-                    text = item.amountText.orEmpty(),
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = TimesNewRomanFontFamily,
-                        fontSize = 48.sp,
-                        color = TextMain,
-                        fontWeight = FontWeight.Normal
-                    )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            val buttonShape = RoundedCornerShape(20.dp)
-
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(108.dp)
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = buttonShape,
-                        clip = false
-                    )
-                    .clip(buttonShape)
-                    .border(
-                        border = BorderStroke(
-                            width = 1.dp,
-                            brush = ButtonBorderBrush
-                        ),
-                        shape = buttonShape
-                    )
-                    .clickable(
-                        enabled = !paymentInProgress,
-                        onClick = onClick
-                    ),
+                    .weight(1f)
+                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.button_bg),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer {
-                            alpha = if (paymentInProgress) 0.65f else 1f
-                        }
-                )
+                if (item.type == DonationCardType.Custom) {
+                    AmountInput(
+                        value = customAmount,
+                        onValueChange = onAmountChange
+                    )
+                } else {
+                    Text(
+                        text = item.amountText.orEmpty(),
+                        textAlign = TextAlign.Center,
+                        style = TextStyle(
+                            fontFamily = TimesNewRomanFontFamily,
+                            fontSize = 44.sp,
+                            color = TextMain,
+                            fontWeight = FontWeight.Normal
+                        )
+                    )
+                }
+            }
+        }
 
-                Text(
-                    text = item.actionLabel,
-                    textAlign = TextAlign.Center,
-                    style = TextStyle(
-                        fontFamily = CormorantFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        fontSize = 24.sp
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(108.dp)
+                .shadow(
+                    elevation = 8.dp,
+                    shape = buttonShape,
+                    clip = false
+                )
+                .clip(buttonShape)
+                .clickable(
+                    enabled = !paymentInProgress,
+                    onClick = onClick
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.button_bg),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        alpha = if (paymentInProgress) 0.65f else 1f
+                    }
+            )
+
+            Text(
+                text = item.actionLabel,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                style = TextStyle(
+                    fontFamily = CormorantFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    brush = ButtonTextBrush,
+                    fontSize = 20.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.8.sp,
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.50f),
+                        offset = Offset(x = 0f, y = 1f),
+                        blurRadius = 34f
                     )
                 )
-            }
+            )
         }
     }
 }
@@ -756,7 +770,7 @@ fun AmountInput(
 ) {
     val amountTextStyle = TextStyle(
         fontFamily = TimesNewRomanFontFamily,
-        fontSize = 30.sp,
+        fontSize = 44.sp,
         fontWeight = FontWeight.Normal,
         color = TextMain,
         textAlign = TextAlign.Center
@@ -764,12 +778,12 @@ fun AmountInput(
 
     Box(
         modifier = Modifier
-            .width(172.dp)
-            .height(42.dp)
-            .clip(RoundedCornerShape(7.dp))
+            .width(368.dp)
+            .height(50.dp)
+            .clip(RoundedCornerShape(20.dp))
             .border(
                 BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
-                RoundedCornerShape(7.dp)
+                RoundedCornerShape(20.dp)
             )
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
@@ -798,7 +812,7 @@ fun AmountInput(
                             Text(
                                 text = "0",
                                 style = amountTextStyle.copy(
-                                    color = MutedWarm.copy(alpha = 0.45f),
+                                    color = Color.Black.copy(alpha = 0.60f),
                                     textAlign = TextAlign.Center
                                 )
                             )
