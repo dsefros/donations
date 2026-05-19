@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -25,7 +26,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,6 +34,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -73,10 +74,18 @@ private val CormorantFontFamily = FontFamily(
     Font(R.font.cormorant_bold, FontWeight.Bold)
 )
 
+private enum class CardPresentingUiState {
+    Preparing,
+    WaitingForCard,
+    ReturningResult
+}
+
 class CardPresentingActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_AMOUNT = "extra_amount"
+        private const val KEY_PAYMENT_STARTED = "payment_started"
+        private const val TAG = "CardPresentingActivity"
 
         fun createIntent(context: Context, amount: BigDecimal): Intent =
             Intent(context, CardPresentingActivity::class.java).apply {
@@ -85,16 +94,21 @@ class CardPresentingActivity : ComponentActivity() {
     }
 
     private val paymentGateway: PaymentGateway = SkyTechPaymentGateway()
+    private val uiState = mutableStateOf(CardPresentingUiState.Preparing)
+    private var paymentStarted = false
 
     private val posLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        uiState.value = CardPresentingUiState.ReturningResult
+        // Forward original SmartSkyPos result unchanged so MainActivity can reuse SkyTechPaymentGateway.mapTransactionResult(...).
         setResult(result.resultCode, result.data)
         finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        paymentStarted = savedInstanceState?.getBoolean(KEY_PAYMENT_STARTED, false) ?: false
 
         val amountRaw = intent.getStringExtra(EXTRA_AMOUNT)
         val amount = amountRaw?.toBigDecimalOrNull()
@@ -112,17 +126,46 @@ class CardPresentingActivity : ComponentActivity() {
 
         setContent {
             BackHandler(enabled = true) { }
-            CardPresentingScreen(amountText = formatDonationAmount(amount))
+            CardPresentingScreen(
+                amountText = formatDonationAmount(amount),
+                uiState = uiState.value
+            )
             LaunchedEffect(Unit) {
                 delay(500)
-                posLauncher.launch(paymentGateway.buildPaymentIntent(this@CardPresentingActivity, amount))
+                uiState.value = CardPresentingUiState.WaitingForCard
+                startSmartSkyPaymentOnce(amount)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        enableImmersiveMode()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) enableImmersiveMode()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(KEY_PAYMENT_STARTED, paymentStarted)
+        super.onSaveInstanceState(outState)
+    }
+
+    private fun startSmartSkyPaymentOnce(amount: BigDecimal) {
+        if (paymentStarted) return
+        paymentStarted = true
+        // TODO: Investigate SmartSkyPosLib for a headless/card-presenting API.
+        // Current implementation shows our branded pre-payment screen, then delegates to SkyPaymentActivityV2.
+        // Full replacement of SSP card UI requires SDK support or a safe transparent Activity theme.
+        try {
+            posLauncher.launch(paymentGateway.buildPaymentIntent(this, amount))
+        } catch (t: Throwable) {
+            Log.e(TAG, "Failed to start SmartSky payment", t)
+            setResult(Activity.RESULT_CANCELED)
+            finish()
+        }
     }
 
     private fun enableImmersiveMode() {
@@ -139,7 +182,13 @@ class CardPresentingActivity : ComponentActivity() {
 }
 
 @Composable
-fun CardPresentingScreen(amountText: String) {
+private fun CardPresentingScreen(amountText: String, uiState: CardPresentingUiState) {
+    val bottomText = when (uiState) {
+        CardPresentingUiState.Preparing -> "Подготовка оплаты"
+        CardPresentingUiState.WaitingForCard -> "Приложите карту"
+        CardPresentingUiState.ReturningResult -> "Завершаем операцию"
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.my_background),
@@ -166,7 +215,7 @@ fun CardPresentingScreen(amountText: String) {
                 DecorativeBankCard()
             }
             Text(
-                text = "Приложите карту",
+                text = bottomText,
                 fontFamily = AlegreyaFontFamily,
                 fontStyle = FontStyle.Italic,
                 fontSize = 22.sp,
@@ -288,7 +337,8 @@ fun DecorativeBankCard() {
 }
 
 private fun formatDonationAmount(amount: BigDecimal): String {
-    val normalized = amount.setScale(0, RoundingMode.HALF_UP).toPlainString()
-    val grouped = normalized.reversed().chunked(3).joinToString(" ").reversed()
+    // UI shows whole rubles; payment amount itself is still passed to SmartSkyPos unchanged.
+    val rubles = amount.setScale(0, RoundingMode.DOWN).toPlainString()
+    val grouped = rubles.reversed().chunked(3).joinToString(" ").reversed()
     return "$grouped ₽"
 }
