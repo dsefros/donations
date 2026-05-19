@@ -63,8 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orthodox.charity.audio.AppAudioController
 import com.orthodox.charity.payment.AppPaymentResult
-import com.orthodox.charity.payment.PaymentGateway
-import com.orthodox.charity.payment.SkyTechPaymentGateway
+import com.orthodox.charity.payment.CardPresentingActivity
 import com.orthodox.charity.settings.AppSettingsStorage
 import com.orthodox.charity.settings.DonationSettings
 import java.math.BigDecimal
@@ -118,7 +117,6 @@ private val CormorantFontFamily = FontFamily(
 )
 
 class MainActivity : ComponentActivity() {
-    private val paymentGateway: PaymentGateway = SkyTechPaymentGateway()
     private val audioController = AppAudioController()
     private val paymentResult = mutableStateOf<AppPaymentResult?>(null)
     private lateinit var settingsStorage: AppSettingsStorage
@@ -165,7 +163,7 @@ class MainActivity : ComponentActivity() {
                     if (paymentInProgress.value) return@OrthodoxCharityApp
                     paymentInProgress.value = true
                     audioController.pauseMainLoop()
-                    posLauncher.launch(paymentGateway.buildPaymentIntent(this@MainActivity, amount))
+                    posLauncher.launch(CardPresentingActivity.createIntent(this@MainActivity, amount))
                 },
                 customAmountValue = customAmount.value,
                 onCustomAmountChange = { customAmount.value = it },
