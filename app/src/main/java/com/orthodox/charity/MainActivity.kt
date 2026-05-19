@@ -659,7 +659,7 @@ private fun DonationCarouselCard(
                 style = TextStyle(
                     fontFamily = AlegreyaFontFamily,
                     fontSize = 20.sp,
-                    color = MutedWarm
+                    color = Color.Black.copy(alpha = 0.60f)
                 )
             )
 
