@@ -37,7 +37,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -75,6 +74,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import kotlinx.coroutines.delay
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 
 private val BgMain = Color(0xFFF5F3F1)
 private val GoldDark = Color(0xFF8A6A30)
@@ -82,6 +84,15 @@ private val BorderGold = Color(0xFFD0B98C)
 private val TextMain = Color(0xFF3D3326)
 private val MutedWarm = Color(0xFF8D7C66)
 
+private val ButtonBorderBrush = Brush.linearGradient(
+    colorStops = arrayOf(
+        0.0f to Color(0xFFEAD489),
+        0.5f to Color(0xFF7A3800),
+        1.0f to Color(0xFF523706)
+    ),
+    start = Offset.Zero,
+    end = Offset.Infinite
+)
 private val AlegreyaFontFamily = FontFamily(
     Font(R.font.alegreya_regular, FontWeight.Normal),
     Font(R.font.alegreya_italic, FontWeight.Normal, FontStyle.Italic),
@@ -334,20 +345,20 @@ fun AppHeader() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 10.dp, bottom = 7.dp),
+            .padding(top = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "ПРАВОСЛАВНАЯ\nБЛАГОТВОРИТЕЛЬНОСТЬ",
+            text = "ПРАВОСЛАВНАЯ БЛАГОТВОРИТЕЛЬНОСТЬ",
             textAlign = TextAlign.Center,
             style = TextStyle(
                 fontFamily = CormorantFontFamily,
-                fontSize = 21.sp,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = GoldDark
             )
         )
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         AppOrnamentDivider()
     }
@@ -370,8 +381,8 @@ private fun PsalmFooter() {
         style = TextStyle(
             fontFamily = AlegreyaFontFamily,
             fontStyle = FontStyle.Italic,
-            color = GoldDark,
-            fontSize = 13.sp
+            color = Color(0xFF8F6630),
+            fontSize = 16.sp
         )
     )
 }
@@ -385,8 +396,8 @@ fun AppOrnamentDivider(
         contentDescription = null,
         contentScale = ContentScale.Fit,
         modifier = modifier
-            .width(232.dp)
-            .height(24.dp)
+            .width(416.dp)
+            .height(53.dp)
     )
 }
 
@@ -399,8 +410,8 @@ fun CardOrnamentDivider(
         contentDescription = null,
         contentScale = ContentScale.Fit,
         modifier = modifier
-            .width(160.dp)
-            .height(14.dp)
+            .width(368.dp)
+            .height(21.dp)
             .graphicsLayer {
                 alpha = 0.92f
             }
@@ -496,40 +507,91 @@ private fun DonationCarouselPanel(
 ) {
     val pages = remember(settings) {
         listOf(
-            DonationCarouselItem("СВОЯ СУММА", "Введите любую сумму", null, "ВНЕСТИ ЛЕПТУ", DonationCardType.Custom),
-            DonationCarouselItem("ПОМОЩЬ ХРАМУ", "Нужды церкви", formatAmountGroups(settings.templeAmount) + " ₽", "ПОЖЕРТВОВАТЬ", DonationCardType.Temple),
-            DonationCarouselItem("ДЕТСКИЙ ПРИЮТ", "Забота о сиротах и детях", formatAmountGroups(settings.orphanageAmount) + " ₽", "ПОЖЕРТВОВАТЬ", DonationCardType.Orphanage)
+            DonationCarouselItem(
+                title = "СВОЯ СУММА",
+                description = "Введите любую сумму",
+                amountText = null,
+                actionLabel = "ВНЕСТИ ЛЕПТУ",
+                type = DonationCardType.Custom
+            ),
+            DonationCarouselItem(
+                title = "ПОМОЩЬ ХРАМУ",
+                description = "Нужды церкви",
+                amountText = formatAmountGroups(settings.templeAmount) + " ₽",
+                actionLabel = "ПОЖЕРТВОВАТЬ",
+                type = DonationCardType.Temple
+            ),
+            DonationCarouselItem(
+                title = "ДЕТСКИЙ ПРИЮТ",
+                description = "Забота о сиротах и детях",
+                amountText = formatAmountGroups(settings.orphanageAmount) + " ₽",
+                actionLabel = "ПОЖЕРТВОВАТЬ",
+                type = DonationCardType.Orphanage
+            )
         )
     }
+
     val pagerState = rememberPagerState(pageCount = { pages.size })
+
     LaunchedEffect(pagerState, paymentInProgress, pages.size) {
         while (true) {
-            delay(60_000)
+            delay(30_000)
+
             if (!paymentInProgress && pages.isNotEmpty()) {
-                pagerState.animateScrollToPage((pagerState.currentPage + 1) % pages.size)
+                val nextPage = (pagerState.currentPage + 1) % pages.size
+                pagerState.animateScrollToPage(nextPage)
             }
         }
     }
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        HorizontalPager(state = pagerState, modifier = Modifier.fillMaxWidth()) { page ->
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(277.dp)
+        ) { page ->
             val item = pages[page]
+
             DonationCarouselCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+                    .height(277.dp),
                 item = item,
                 customAmount = customAmount,
                 onAmountChange = onAmountChange,
                 paymentInProgress = paymentInProgress,
                 onClick = {
                     if (paymentInProgress) return@DonationCarouselCard
+
                     when (item.type) {
-                        DonationCardType.Custom -> parseDonationAmount(customAmount)?.let(onPayment)
-                        DonationCardType.Temple -> parseDonationAmount(settings.templeAmount)?.let(onPayment)
-                        DonationCardType.Orphanage -> parseDonationAmount(settings.orphanageAmount)?.let(onPayment)
+                        DonationCardType.Custom -> {
+                            parseDonationAmount(customAmount)?.let(onPayment)
+                        }
+
+                        DonationCardType.Temple -> {
+                            parseDonationAmount(settings.templeAmount)?.let(onPayment)
+                        }
+
+                        DonationCardType.Orphanage -> {
+                            parseDonationAmount(settings.orphanageAmount)?.let(onPayment)
+                        }
                     }
                 }
             )
         }
-        Spacer(modifier = Modifier.height(14.dp))
-        CarouselPageIndicator(pageCount = pages.size, currentPage = pagerState.currentPage)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        CarouselPageIndicator(
+            pageCount = pages.size,
+            currentPage = pagerState.currentPage
+        )
     }
 }
 
@@ -537,47 +599,134 @@ private fun DonationCarouselPanel(
 
 @Composable
 private fun DonationCarouselCard(
+    modifier: Modifier = Modifier,
     item: DonationCarouselItem,
     customAmount: String,
     onAmountChange: (String) -> Unit,
     paymentInProgress: Boolean,
     onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 32.dp)
-            .height(282.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color(0xFFF8F5EE))
-            .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(20.dp))
-            .padding(20.dp)
+    val cardShape = RoundedCornerShape(20.dp)
+
+    Column(
+        modifier = modifier
+            .shadow(
+                elevation = 10.dp,
+                shape = cardShape,
+                clip = false
+            )
+            .clip(cardShape)
+            .background(Color.White)
+            .border(
+                border = BorderStroke(
+                    width = 1.dp,
+                    color = BorderGold.copy(alpha = 0.75f)
+                ),
+                shape = cardShape
+            )
+            .padding(start = 8.dp, top = 16.dp, end = 8.dp, bottom = 8.dp)
     ) {
-        Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(item.title, style = TextStyle(fontFamily = AlegreyaFontFamily, fontWeight = FontWeight.SemiBold, fontSize = 20.sp, color = GoldDark), textAlign = TextAlign.Center)
-            Text(item.description, style = TextStyle(fontFamily = AlegreyaFontFamily, fontSize = 16.sp, color = MutedWarm), textAlign = TextAlign.Center)
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = item.title,
+                textAlign = TextAlign.Center,
+                style = TextStyle(
+                    fontFamily = CormorantFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    color = GoldDark
+                )
+            )
+
+            Text(
+                text = item.description,
+                textAlign = TextAlign.Center,
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 20.sp,
+                    color = MutedWarm
+                )
+            )
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            CardOrnamentDivider(
+                modifier = Modifier
+                    .width(368.dp)
+                    .height(21.dp)
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
-            CardOrnamentDivider()
-            Spacer(modifier = Modifier.height(10.dp))
+
             if (item.type == DonationCardType.Custom) {
-                AmountInput(value = customAmount, onValueChange = onAmountChange)
+                AmountInput(
+                    value = customAmount,
+                    onValueChange = onAmountChange
+                )
             } else {
                 Text(
                     text = item.amountText.orEmpty(),
-                    style = TextStyle(fontFamily = TimesNewRomanFontFamily, fontSize = 52.sp, color = TextMain)
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontFamily = TimesNewRomanFontFamily,
+                        fontSize = 48.sp,
+                        color = TextMain,
+                        fontWeight = FontWeight.Normal
+                    )
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val buttonShape = RoundedCornerShape(20.dp)
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(78.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable(enabled = !paymentInProgress, onClick = onClick),
+                    .height(108.dp)
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = buttonShape,
+                        clip = false
+                    )
+                    .clip(buttonShape)
+                    .border(
+                        border = BorderStroke(
+                            width = 1.dp,
+                            brush = ButtonBorderBrush
+                        ),
+                        shape = buttonShape
+                    )
+                    .clickable(
+                        enabled = !paymentInProgress,
+                        onClick = onClick
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Image(painter = painterResource(id = R.drawable.button_bg), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                Text(item.actionLabel, style = TextStyle(fontFamily = AlegreyaFontFamily, fontWeight = FontWeight.SemiBold, color = Color.White, fontSize = 17.sp))
+                Image(
+                    painter = painterResource(id = R.drawable.button_bg),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            alpha = if (paymentInProgress) 0.65f else 1f
+                        }
+                )
+
+                Text(
+                    text = item.actionLabel,
+                    textAlign = TextAlign.Center,
+                    style = TextStyle(
+                        fontFamily = CormorantFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        fontSize = 24.sp
+                    )
+                )
             }
         }
     }
