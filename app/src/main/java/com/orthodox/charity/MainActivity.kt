@@ -688,7 +688,7 @@ private fun DonationCarouselCard(
                         textAlign = TextAlign.Center,
                         style = TextStyle(
                             fontFamily = TimesNewRomanFontFamily,
-                            fontSize = 44.sp,
+                            fontSize = 40.sp,
                             color = TextMain,
                             fontWeight = FontWeight.Normal
                         )
@@ -770,26 +770,32 @@ fun AmountInput(
 ) {
     val amountTextStyle = TextStyle(
         fontFamily = TimesNewRomanFontFamily,
-        fontSize = 44.sp,
+        fontSize = 40.sp,
         fontWeight = FontWeight.Normal,
         color = TextMain,
         textAlign = TextAlign.Center
+    )
+
+    val visibleText = formatAmountGroups(value).ifEmpty { "0" }
+
+    val inputWidth = (visibleText.length * 24).dp.coerceIn(
+        minimumValue = 28.dp,
+        maximumValue = 170.dp
     )
 
     Box(
         modifier = Modifier
             .width(368.dp)
             .height(50.dp)
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(12.dp))
             .border(
                 BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)),
-                RoundedCornerShape(20.dp)
+                RoundedCornerShape(12.dp)
             )
-            .padding(horizontal = 8.dp),
+            .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -802,7 +808,7 @@ fun AmountInput(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 visualTransformation = AmountThousandsVisualTransformation(),
                 textStyle = amountTextStyle.copy(textAlign = TextAlign.Center),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.width(inputWidth),
                 decorationBox = { innerTextField ->
                     Box(
                         modifier = Modifier.fillMaxWidth(),
@@ -812,7 +818,7 @@ fun AmountInput(
                             Text(
                                 text = "0",
                                 style = amountTextStyle.copy(
-                                    color = Color.Black.copy(alpha = 0.60f),
+                                    color = MutedWarm.copy(alpha = 0.45f),
                                     textAlign = TextAlign.Center
                                 )
                             )
@@ -922,14 +928,14 @@ fun PaymentResultDialog(
         AppPaymentResult.Declined -> DialogUi(
             icon = "✕",
             title = "ПОЖЕРТВОВАНИЕ НЕ ПРИНЯТО",
-            message = "Пожертвование не было списано. Попробуйте ещё раз",
+            message = "Попробуйте ещё раз",
             buttonLabel = "ЗАКРЫТЬ"
         )
 
         AppPaymentResult.Error -> DialogUi(
             icon = "!",
             title = "ОШИБКА",
-            message = "Не удалось выполнить оплату. Попробуйте ещё раз",
+            message = "Попробуйте ещё раз",
             buttonLabel = "ЗАКРЫТЬ"
         )
     }
@@ -948,8 +954,9 @@ fun PaymentResultDialog(
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 300.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .widthIn(max = 380.dp)
+                .height(275.dp)
+                .clip(RoundedCornerShape(20.dp))
                 .background(Color.White)
                 .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
                 .clickable(
@@ -958,21 +965,21 @@ fun PaymentResultDialog(
                 ) {},
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             AppOrnamentDivider(
                 modifier = Modifier
-                    .width(190.dp)
-                    .height(18.dp)
+                    .width(296.dp)
+                    .height(38.dp)
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 text = dialogUi.title,
                 style = TextStyle(
                     fontFamily = CormorantFontFamily,
-                    fontSize = 16.sp,
+                    fontSize = 20.sp,
                     color = GoldDark,
                     fontWeight = FontWeight.Bold
                 )
@@ -990,7 +997,7 @@ fun PaymentResultDialog(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 style = TextStyle(
                     fontFamily = AlegreyaFontFamily,
-                    fontSize = 14.sp,
+                    fontSize = 16.sp,
                     color = TextMain
                 )
             )
@@ -1001,7 +1008,7 @@ fun PaymentResultDialog(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
-                    .height(42.dp)
+                    .height(44.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .clickable { onDismiss() },
                 contentAlignment = Alignment.Center
@@ -1016,11 +1023,11 @@ fun PaymentResultDialog(
                 Text(
                     text = dialogUi.buttonLabel,
                     style = TextStyle(
-                        color = Color.White,
-                        fontFamily = AlegreyaFontFamily,
-                        fontSize = 13.sp,
-                        letterSpacing = 1.sp,
-                        fontWeight = FontWeight.SemiBold
+                        brush = ButtonTextBrush,
+                        fontFamily = CormorantFontFamily,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+
                     )
                 )
             }
