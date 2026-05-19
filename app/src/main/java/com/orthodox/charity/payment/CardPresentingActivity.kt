@@ -84,8 +84,8 @@ class CardPresentingActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_AMOUNT = "extra_amount"
-        private const val KEY_PAYMENT_STARTED = "payment_started"
         private const val TAG = "CardPresentingActivity"
+        private const val START_PAYMENT_DELAY_MS = 900L
 
         fun createIntent(context: Context, amount: BigDecimal): Intent =
             Intent(context, CardPresentingActivity::class.java).apply {
@@ -108,7 +108,8 @@ class CardPresentingActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        paymentStarted = savedInstanceState?.getBoolean(KEY_PAYMENT_STARTED, false) ?: false
+        // CardPresentingActivity is a short-lived bridge screen; restarting the payment after process death
+        // is safer than restoring a half-started external payment flow.
 
         val amountRaw = intent.getStringExtra(EXTRA_AMOUNT)
         val amount = amountRaw?.toBigDecimalOrNull()
@@ -130,8 +131,8 @@ class CardPresentingActivity : ComponentActivity() {
                 amountText = formatDonationAmount(amount),
                 uiState = uiState.value
             )
-            LaunchedEffect(Unit) {
-                delay(500)
+            LaunchedEffect(amount) {
+                delay(START_PAYMENT_DELAY_MS)
                 uiState.value = CardPresentingUiState.WaitingForCard
                 startSmartSkyPaymentOnce(amount)
             }
@@ -147,12 +148,6 @@ class CardPresentingActivity : ComponentActivity() {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) enableImmersiveMode()
     }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(KEY_PAYMENT_STARTED, paymentStarted)
-        super.onSaveInstanceState(outState)
-    }
-
     private fun startSmartSkyPaymentOnce(amount: BigDecimal) {
         if (paymentStarted) return
         paymentStarted = true
@@ -227,7 +222,7 @@ private fun CardPresentingScreen(amountText: String, uiState: CardPresentingUiSt
 }
 
 @Composable
-fun CardPresentingHeader() {
+private fun CardPresentingHeader() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(top = 16.dp)
@@ -251,7 +246,7 @@ fun CardPresentingHeader() {
 }
 
 @Composable
-fun CardPresentingAmount(amountText: String) {
+private fun CardPresentingAmount(amountText: String) {
     Text(
         text = amountText,
         fontFamily = TimesNewRomanFontFamily,
@@ -262,7 +257,7 @@ fun CardPresentingAmount(amountText: String) {
 }
 
 @Composable
-fun PaymentTargetRings() {
+private fun PaymentTargetRings() {
     val transition = rememberInfiniteTransition(label = "rings")
     val scale = transition.animateFloat(
         initialValue = 0.96f,
@@ -291,7 +286,7 @@ fun PaymentTargetRings() {
 }
 
 @Composable
-fun DecorativeBankCard() {
+private fun DecorativeBankCard() {
     Box(
         modifier = Modifier
             .size(width = 230.dp, height = 130.dp)
