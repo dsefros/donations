@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orthodox.charity.audio.AppAudioController
 import com.orthodox.charity.payment.AppPaymentResult
+import com.orthodox.charity.payment.CardPresentingActivity
 import com.orthodox.charity.payment.PaymentGateway
 import com.orthodox.charity.payment.SkyTechPaymentGateway
 import com.orthodox.charity.settings.AppSettingsStorage
@@ -165,7 +166,7 @@ class MainActivity : ComponentActivity() {
                     if (paymentInProgress.value) return@OrthodoxCharityApp
                     paymentInProgress.value = true
                     audioController.pauseMainLoop()
-                    posLauncher.launch(paymentGateway.buildPaymentIntent(this@MainActivity, amount))
+                    posLauncher.launch(CardPresentingActivity.createIntent(this@MainActivity, amount))
                 },
                 customAmountValue = customAmount.value,
                 onCustomAmountChange = { customAmount.value = it },

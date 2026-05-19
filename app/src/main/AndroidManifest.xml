@@ -11,6 +11,15 @@
         android:persistent="true"
         android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
 
+
+        <activity
+            android:name=".payment.CardPresentingActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppFullscreenTheme"
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
