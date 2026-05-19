@@ -18,28 +18,20 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -54,6 +46,13 @@ import com.orthodox.charity.R
 import kotlinx.coroutines.delay
 import java.math.BigDecimal
 import java.math.RoundingMode
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.runtime.remember
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.foundation.layout.offset
 
 private val GoldDark = Color(0xFF8A6A30)
 private val TextMain = Color(0xFF3D3326)
@@ -85,7 +84,7 @@ class CardPresentingActivity : ComponentActivity() {
     companion object {
         const val EXTRA_AMOUNT = "extra_amount"
         private const val TAG = "CardPresentingActivity"
-        private const val START_PAYMENT_DELAY_MS = 900L
+        private const val START_PAYMENT_DELAY_MS = 3900L
 
         fun createIntent(context: Context, amount: BigDecimal): Intent =
             Intent(context, CardPresentingActivity::class.java).apply {
@@ -186,7 +185,7 @@ private fun CardPresentingScreen(amountText: String, uiState: CardPresentingUiSt
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.drawable.my_background),
+            painter = painterResource(id = R.drawable.card_presenting_background),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -203,7 +202,8 @@ private fun CardPresentingScreen(amountText: String, uiState: CardPresentingUiSt
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .offset(y = (-24).dp),
                 contentAlignment = Alignment.Center
             ) {
                 PaymentTargetRings()
@@ -258,77 +258,195 @@ private fun CardPresentingAmount(amountText: String) {
 
 @Composable
 private fun PaymentTargetRings() {
-    val transition = rememberInfiniteTransition(label = "rings")
-    val scale = transition.animateFloat(
-        initialValue = 0.96f,
-        targetValue = 1.04f,
-        animationSpec = infiniteRepeatable(animation = tween(1800), repeatMode = RepeatMode.Reverse),
-        label = "ringScale"
+    val transition = rememberInfiniteTransition(label = "payment_target_ripple")
+
+    val waveProgress = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 2600,
+                easing = LinearEasing
+            ),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "wave_progress"
     )
-    val alpha = transition.animateFloat(
-        initialValue = 0.45f,
-        targetValue = 0.75f,
-        animationSpec = infiniteRepeatable(animation = tween(1800), repeatMode = RepeatMode.Reverse),
-        label = "ringAlpha"
+
+    val centerGlow = transition.animateFloat(
+        initialValue = 0.86f,
+        targetValue = 1.08f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 1700,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "center_glow"
     )
 
     Canvas(
-        modifier = Modifier
-            .size(270.dp)
-            .scale(scale.value)
+        modifier = Modifier.size(270.dp)
     ) {
-        val center = center
         val baseColor = Color(0xFFB58A3B)
-        drawCircle(color = baseColor.copy(alpha = 0.20f * alpha.value), radius = size.minDimension * 0.46f, center = center)
-        drawCircle(color = baseColor.copy(alpha = 0.28f * alpha.value), radius = size.minDimension * 0.34f, center = center)
-        drawCircle(color = baseColor.copy(alpha = 0.35f * alpha.value), radius = size.minDimension * 0.22f, center = center)
+        val maxRadius = size.minDimension * 0.47f
+        val minRadius = size.minDimension * 0.12f
+
+        // Мягкое центральное свечение
+        drawCircle(
+            color = baseColor.copy(alpha = 0.10f),
+            radius = size.minDimension * 0.24f * centerGlow.value,
+            center = center
+        )
+
+        drawCircle(
+            color = baseColor.copy(alpha = 0.16f),
+            radius = size.minDimension * 0.145f * centerGlow.value,
+            center = center
+        )
+
+        // Три расходящиеся волны с разной фазой
+        repeat(3) { index ->
+            val phase = (waveProgress.value + index * 0.33f) % 1f
+
+            val radius = minRadius + (maxRadius - minRadius) * phase
+            val alpha = (1f - phase).coerceIn(0f, 1f)
+
+            drawCircle(
+                color = baseColor.copy(alpha = 0.32f * alpha),
+                radius = radius,
+                center = center,
+                style = Stroke(
+                    width = 2.2.dp.toPx()
+                )
+            )
+
+            drawCircle(
+                color = baseColor.copy(alpha = 0.10f * alpha),
+                radius = radius + 8.dp.toPx(),
+                center = center,
+                style = Stroke(
+                    width = 5.dp.toPx()
+                )
+            )
+        }
+
+        // Тонкое статичное внутреннее кольцо
+        drawCircle(
+            color = baseColor.copy(alpha = 0.34f),
+            radius = size.minDimension * 0.18f,
+            center = center,
+            style = Stroke(width = 1.4.dp.toPx())
+        )
     }
 }
 
 @Composable
 private fun DecorativeBankCard() {
-    Box(
-        modifier = Modifier
-            .size(width = 230.dp, height = 130.dp)
-            .graphicsLayer {
-                rotationZ = 14f
-                translationX = 95f
-                translationY = 25f
-            }
-            .clip(RoundedCornerShape(12.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(Color(0xFF4E4E4E), Color(0xFF2E2E2E), Color(0xFF1D1D1D))
-                )
-            )
-            .padding(14.dp)
-    ) {
-        Column(verticalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxSize()) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                repeat(4) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFB7B7B7).copy(alpha = 0.6f))
-                    )
-                }
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.72f)
-                    .height(2.dp)
-                    .background(Color(0xFFE1E1E1).copy(alpha = 0.35f))
-            )
-            Text(
-                text = "•••• 8724",
-                color = Color(0xFFF5F5F5),
-                fontFamily = TimesNewRomanFontFamily,
-                fontSize = 20.sp,
-                modifier = Modifier.align(Alignment.End)
-            )
-        }
+    val cardVisible = remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(120)
+        cardVisible.value = true
     }
+
+    val cardX = animateFloatAsState(
+        targetValue = if (cardVisible.value) 180f else 220f,
+        animationSpec = tween(
+            durationMillis = 950,
+            easing = FastOutSlowInEasing
+        ),
+        label = "card_x"
+    )
+
+    val cardY = animateFloatAsState(
+        targetValue = if (cardVisible.value) -25f else -125f,
+        animationSpec = tween(
+            durationMillis = 950,
+            easing = FastOutSlowInEasing
+        ),
+        label = "card_y"
+    )
+
+    val cardRotation = animateFloatAsState(
+        targetValue = if (cardVisible.value) 14f else 18f,
+        animationSpec = tween(
+            durationMillis = 950,
+            easing = FastOutSlowInEasing
+        ),
+        label = "card_rotation"
+    )
+
+    val cardAlpha = animateFloatAsState(
+        targetValue = if (cardVisible.value) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = FastOutSlowInEasing
+        ),
+        label = "card_alpha"
+    )
+
+    val cardScale = animateFloatAsState(
+        targetValue = if (cardVisible.value) 1f else 0.96f,
+        animationSpec = tween(
+            durationMillis = 950,
+            easing = FastOutSlowInEasing
+        ),
+        label = "card_scale"
+    )
+
+    val attachTransition = rememberInfiniteTransition(label = "card_attach_cycle")
+
+    val attachProgress = attachTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = keyframes {
+                durationMillis = 3600
+
+                // Пауза после появления карты
+                0f at 0 using FastOutSlowInEasing
+                0f at 900 using FastOutSlowInEasing
+
+                // Карта плавно идет к экрану
+                1f at 1650 using FastOutSlowInEasing
+
+                // Небольшая фиксация — как будто карта приложена
+                1f at 1950 using FastOutSlowInEasing
+
+                // Карта поднимается обратно
+                0f at 2750 using FastOutSlowInEasing
+
+                // Пауза перед следующим циклом
+                0f at 3600 using FastOutSlowInEasing
+            },
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "card_attach_progress"
+    )
+
+    val attachEnabled = if (cardAlpha.value >= 0.98f) 1f else 0f
+    val effectiveAttach = attachProgress.value * attachEnabled
+
+    Image(
+        painter = painterResource(id = R.drawable.card_presenting_custom),
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+        modifier = Modifier
+            .size(width = 230.dp, height = 146.dp)
+            .graphicsLayer {
+                translationX = cardX.value + (-44f * effectiveAttach)
+                translationY = cardY.value + (42f * effectiveAttach)
+                rotationZ = cardRotation.value + (-5f * effectiveAttach)
+
+                val pressScale = 1f - (0.035f * effectiveAttach)
+                scaleX = cardScale.value * pressScale
+                scaleY = cardScale.value * pressScale
+
+                alpha = cardAlpha.value
+            }
+    )
 }
 
 private fun formatDonationAmount(amount: BigDecimal): String {

@@ -77,6 +77,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shadow
+import com.orthodox.charity.payment.PaymentGateway
+import com.orthodox.charity.payment.SkyTechPaymentGateway
 
 private val BgMain = Color(0xFFF5F3F1)
 private val GoldDark = Color(0xFF8A6A30)
@@ -117,6 +119,7 @@ private val CormorantFontFamily = FontFamily(
 )
 
 class MainActivity : ComponentActivity() {
+    private val paymentGateway: PaymentGateway = SkyTechPaymentGateway()
     private val audioController = AppAudioController()
     private val paymentResult = mutableStateOf<AppPaymentResult?>(null)
     private lateinit var settingsStorage: AppSettingsStorage
