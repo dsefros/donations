@@ -77,6 +77,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Shadow
 import com.orthodox.charity.payment.PaymentGateway
 import com.orthodox.charity.payment.SkyTechPaymentGateway
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.foundation.layout.offset
 
 private val BgMain = Color(0xFFF5F3F1)
 private val GoldDark = Color(0xFF8A6A30)
@@ -1068,6 +1070,7 @@ fun SettingsPinDialog(onSuccess: () -> Unit, onDismiss: () -> Unit) {
     ) {
         Column(
             modifier = Modifier
+                .offset(y = (-90).dp)
                 .width(300.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White)
@@ -1234,7 +1237,12 @@ private fun SettingsCardToggle(
     ) {
         Checkbox(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            colors = CheckboxDefaults.colors(
+                checkedColor = GoldDark,
+                uncheckedColor = BorderGold,
+                checkmarkColor = Color.White
+            )
         )
         Text(
             text = label,
@@ -1257,7 +1265,7 @@ private fun SettingsAmountField(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, bottom = 8.dp)
+            .padding(top = 2.dp, bottom = 2.dp)
             .clip(RoundedCornerShape(7.dp))
             .border(BorderStroke(1.dp, BorderGold.copy(alpha = 0.75f)), RoundedCornerShape(7.dp))
             .padding(horizontal = 10.dp, vertical = 8.dp)
