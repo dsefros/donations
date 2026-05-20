@@ -84,7 +84,7 @@ class CardPresentingActivity : ComponentActivity() {
     companion object {
         const val EXTRA_AMOUNT = "extra_amount"
         private const val TAG = "CardPresentingActivity"
-        private const val START_PAYMENT_DELAY_MS = 3900L
+        private const val START_PAYMENT_DELAY_MS = 900L
 
         fun createIntent(context: Context, amount: BigDecimal): Intent =
             Intent(context, CardPresentingActivity::class.java).apply {
