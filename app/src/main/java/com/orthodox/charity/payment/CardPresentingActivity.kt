@@ -377,16 +377,11 @@ private fun CardPresentingScreen(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "×",
-                    style = TextStyle(
-                        fontFamily = AlegreyaFontFamily,
-                        fontSize = 30.sp,
-                        lineHeight = 30.sp,
-                        color = GoldDark,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center
-                    )
+                Image(
+                    painter = painterResource(id = R.drawable.card_presenting_close),
+                    contentDescription = "Отменить операцию",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
