@@ -18,6 +18,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,16 +34,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orthodox.charity.R
@@ -54,11 +62,12 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.runtime.remember
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.BorderStroke
 
 private val GoldDark = Color(0xFF8A6A30)
 private val TextMain = Color(0xFF3D3326)
@@ -95,6 +104,7 @@ class CardPresentingActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_AMOUNT = "extra_amount"
+        const val EXTRA_CANCELLED_BY_USER = "extra_cancelled_by_user"
         private const val TAG = "CardPresentingActivity"
         private const val START_PAYMENT_DELAY_MS = 900L
 
@@ -133,7 +143,8 @@ class CardPresentingActivity : ComponentActivity() {
             BackHandler(enabled = true) { }
             CardPresentingScreen(
                 amountText = formatDonationAmount(amount),
-                uiState = uiState.value
+                uiState = uiState.value,
+                onCancel = { cancelPaymentByUser() }
             )
             LaunchedEffect(amount) {
                 startHeadlessPaymentOnce(amount)
@@ -208,6 +219,27 @@ class CardPresentingActivity : ComponentActivity() {
         }
     }
 
+    private fun cancelPaymentByUser() {
+        if (paymentCompleted || isFinishing || isDestroyed) return
+
+        paymentCompleted = true
+
+        headlessClient?.cancelCardReading()
+
+        paymentJob?.cancel()
+        paymentJob = null
+
+        headlessClient?.close()
+        headlessClient = null
+
+        setResult(
+            Activity.RESULT_CANCELED,
+            Intent().putExtra(EXTRA_CANCELLED_BY_USER, true)
+        )
+
+        finish()
+    }
+
 
     override fun onDestroy() {
         paymentJob?.cancel()
@@ -234,7 +266,11 @@ class CardPresentingActivity : ComponentActivity() {
 }
 
 @Composable
-private fun CardPresentingScreen(amountText: String, uiState: CardPresentingUiState) {
+private fun CardPresentingScreen(
+    amountText: String,
+    uiState: CardPresentingUiState,
+    onCancel: () -> Unit
+) {
     val bottomText = when (uiState) {
         CardPresentingUiState.Preparing -> "Подготовка оплаты"
         CardPresentingUiState.WaitingForCard -> "Приложите карту"
@@ -280,6 +316,38 @@ private fun CardPresentingScreen(amountText: String, uiState: CardPresentingUiSt
                 fontSize = 22.sp,
                 color = Color(0xFF8F6630),
                 modifier = Modifier.padding(bottom = 26.dp)
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 14.dp, end = 14.dp)
+                .size(42.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Color.White.copy(alpha = 0.74f))
+                .border(
+                    BorderStroke(1.dp, Color(0xFFD0B98C).copy(alpha = 0.75f)),
+                    RoundedCornerShape(50)
+                )
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    onCancel()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "×",
+                style = TextStyle(
+                    fontFamily = AlegreyaFontFamily,
+                    fontSize = 30.sp,
+                    lineHeight = 30.sp,
+                    color = GoldDark,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
+                )
             )
         }
     }
