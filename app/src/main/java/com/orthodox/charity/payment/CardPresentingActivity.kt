@@ -10,7 +10,7 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -43,7 +43,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.orthodox.charity.R
+import com.skytech.smartskyposlib.State
+import com.skytech.smartskyposlib.TransactionParams
+import com.skytech.smartskyposlib.ui.PaymentActivity
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -76,6 +82,12 @@ private val CormorantFontFamily = FontFamily(
 private enum class CardPresentingUiState {
     Preparing,
     WaitingForCard,
+    PinEntering,
+    UseChip,
+    PresentAgain,
+    UseOtherInterface,
+    UseMagReader,
+    Processing,
     ReturningResult
 }
 
@@ -92,18 +104,11 @@ class CardPresentingActivity : ComponentActivity() {
             }
     }
 
-    private val paymentGateway: PaymentGateway = SkyTechPaymentGateway()
     private val uiState = mutableStateOf(CardPresentingUiState.Preparing)
     private var paymentStarted = false
-
-    private val posLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        uiState.value = CardPresentingUiState.ReturningResult
-        // Forward original SmartSkyPos result unchanged so MainActivity can reuse SkyTechPaymentGateway.mapTransactionResult(...).
-        setResult(result.resultCode, result.data)
-        finish()
-    }
+    private var paymentCompleted = false
+    private var paymentJob: Job? = null
+    private var headlessClient: SmartSkyPosHeadlessClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,9 +136,7 @@ class CardPresentingActivity : ComponentActivity() {
                 uiState = uiState.value
             )
             LaunchedEffect(amount) {
-                delay(START_PAYMENT_DELAY_MS)
-                uiState.value = CardPresentingUiState.WaitingForCard
-                startSmartSkyPaymentOnce(amount)
+                startHeadlessPaymentOnce(amount)
             }
         }
     }
@@ -147,19 +150,74 @@ class CardPresentingActivity : ComponentActivity() {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) enableImmersiveMode()
     }
-    private fun startSmartSkyPaymentOnce(amount: BigDecimal) {
+    private fun startHeadlessPaymentOnce(amount: BigDecimal) {
         if (paymentStarted) return
+        if (isFinishing || isDestroyed) return
+
         paymentStarted = true
-        // TODO: Investigate SmartSkyPosLib for a headless/card-presenting API.
-        // Current implementation shows our branded pre-payment screen, then delegates to SkyPaymentActivityV2.
-        // Full replacement of SSP card UI requires SDK support or a safe transparent Activity theme.
-        try {
-            posLauncher.launch(paymentGateway.buildPaymentIntent(this, amount))
-        } catch (t: Throwable) {
-            Log.e(TAG, "Failed to start SmartSky payment", t)
-            setResult(Activity.RESULT_CANCELED)
-            finish()
+        headlessClient = SmartSkyPosHeadlessClient(applicationContext)
+
+        paymentJob = lifecycleScope.launch {
+            try {
+                delay(START_PAYMENT_DELAY_MS)
+                uiState.value = CardPresentingUiState.WaitingForCard
+
+                val result = headlessClient!!.payment(
+                    params = TransactionParams(amount),
+                    onStateChanged = { stateCode, message ->
+                        runOnUiThread {
+                            updateUiStateFromSspState(stateCode, message)
+                        }
+                    }
+                )
+
+                uiState.value = CardPresentingUiState.ReturningResult
+                paymentCompleted = true
+                setResult(Activity.RESULT_OK, Intent().putExtra(PaymentActivity.RESULT_KEY, result))
+                if (!isFinishing) finish()
+            } catch (t: CancellationException) {
+                throw t
+            } catch (t: Throwable) {
+                Log.e(TAG, "Headless SmartSky payment failed: ${t.javaClass.simpleName}")
+                setResult(Activity.RESULT_CANCELED)
+                if (!isFinishing) finish()
+            } finally {
+                headlessClient?.close()
+                headlessClient = null
+            }
         }
+    }
+
+    private fun updateUiStateFromSspState(stateCode: Int, message: String?) {
+        // message is intentionally ignored to avoid displaying raw SDK/vendor strings.
+
+        uiState.value = when (stateCode) {
+            State.CARD_READING.code,
+            State.QR_AND_CARD_READING.code -> CardPresentingUiState.WaitingForCard
+
+            State.PIN_CODE_ENTERING.code -> CardPresentingUiState.PinEntering
+            State.USE_CHIP_READER.code -> CardPresentingUiState.UseChip
+            State.PRESENT_CARD_AGAIN.code -> CardPresentingUiState.PresentAgain
+            State.USE_OTHER_INTERFACE.code -> CardPresentingUiState.UseOtherInterface
+            State.USE_MAG_READER.code -> CardPresentingUiState.UseMagReader
+
+            State.CONNECTING.code,
+            State.DATA_EXCHANGE.code -> CardPresentingUiState.Processing
+
+            else -> CardPresentingUiState.WaitingForCard
+        }
+    }
+
+
+    override fun onDestroy() {
+        paymentJob?.cancel()
+        paymentJob = null
+        if (!paymentCompleted) {
+            headlessClient?.cancelCardReading()
+        }
+        headlessClient?.close()
+        headlessClient = null
+        super.onDestroy()
     }
 
     private fun enableImmersiveMode() {
@@ -180,6 +238,12 @@ private fun CardPresentingScreen(amountText: String, uiState: CardPresentingUiSt
     val bottomText = when (uiState) {
         CardPresentingUiState.Preparing -> "Подготовка оплаты"
         CardPresentingUiState.WaitingForCard -> "Приложите карту"
+        CardPresentingUiState.PinEntering -> "Введите PIN на терминале"
+        CardPresentingUiState.UseChip -> "Вставьте карту"
+        CardPresentingUiState.PresentAgain -> "Приложите карту повторно"
+        CardPresentingUiState.UseOtherInterface -> "Используйте другой способ чтения"
+        CardPresentingUiState.UseMagReader -> "Проведите карту"
+        CardPresentingUiState.Processing -> "Связь с банком"
         CardPresentingUiState.ReturningResult -> "Завершаем операцию"
     }
 

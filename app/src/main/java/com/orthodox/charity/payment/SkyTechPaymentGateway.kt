@@ -12,6 +12,8 @@ import java.math.BigDecimal
 
 class SkyTechPaymentGateway : PaymentGateway {
 
+    // buildPaymentIntent is kept for legacy Activity-based fallback.
+    // The main card-presenting flow uses SmartSkyPosHeadlessClient to keep our UI visible.
     override fun buildPaymentIntent(context: Context, amount: BigDecimal): Intent =
         Intent(context, SkyPaymentActivityV2::class.java).apply {
             putExtra(PaymentActivity.PARAMS_KEY, TransactionParams(amount))
