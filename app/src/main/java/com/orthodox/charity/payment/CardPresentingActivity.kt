@@ -118,6 +118,7 @@ class CardPresentingActivity : ComponentActivity() {
     private var paymentStarted = false
     private var paymentCompleted = false
     private var cancelledByUser = false
+    private var operationMovedPastCardReading = false
     private var paymentJob: Job? = null
     private var headlessClient: SmartSkyPosHeadlessClient? = null
 
@@ -178,7 +179,9 @@ class CardPresentingActivity : ComponentActivity() {
                     params = TransactionParams(amount),
                     onStateChanged = { stateCode, message ->
                         runOnUiThread {
-                            updateUiStateFromSspState(stateCode, message)
+                            if (!cancelledByUser && !isFinishing && !isDestroyed) {
+                                updateUiStateFromSspState(stateCode, message)
+                            }
                         }
                     }
                 )
@@ -194,6 +197,10 @@ class CardPresentingActivity : ComponentActivity() {
             } catch (t: CancellationException) {
                 throw t
             } catch (t: Throwable) {
+                if (cancelledByUser || isFinishing || isDestroyed) {
+                    return@launch
+                }
+
                 Log.e(TAG, "Headless SmartSky payment failed: ${t.javaClass.simpleName}")
                 setResult(Activity.RESULT_CANCELED)
                 if (!isFinishing) finish()
@@ -206,21 +213,43 @@ class CardPresentingActivity : ComponentActivity() {
 
     private fun updateUiStateFromSspState(stateCode: Int, message: String?) {
         // message is intentionally ignored to avoid displaying raw SDK/vendor strings.
+        if (uiState.value == CardPresentingUiState.ReturningResult) return
 
         uiState.value = when (stateCode) {
             State.CARD_READING.code,
-            State.QR_AND_CARD_READING.code -> CardPresentingUiState.WaitingForCard
+            State.QR_AND_CARD_READING.code -> {
+                if (operationMovedPastCardReading) {
+                    CardPresentingUiState.Processing
+                } else {
+                    CardPresentingUiState.WaitingForCard
+                }
+            }
 
-            State.PIN_CODE_ENTERING.code -> CardPresentingUiState.PinEntering
+            State.PIN_CODE_ENTERING.code -> {
+                operationMovedPastCardReading = true
+                CardPresentingUiState.PinEntering
+            }
             State.USE_CHIP_READER.code -> CardPresentingUiState.UseChip
-            State.PRESENT_CARD_AGAIN.code -> CardPresentingUiState.PresentAgain
+            State.PRESENT_CARD_AGAIN.code -> {
+                operationMovedPastCardReading = false
+                CardPresentingUiState.PresentAgain
+            }
             State.USE_OTHER_INTERFACE.code -> CardPresentingUiState.UseOtherInterface
             State.USE_MAG_READER.code -> CardPresentingUiState.UseMagReader
 
             State.CONNECTING.code,
-            State.DATA_EXCHANGE.code -> CardPresentingUiState.Processing
+            State.DATA_EXCHANGE.code -> {
+                operationMovedPastCardReading = true
+                CardPresentingUiState.Processing
+            }
 
-            else -> CardPresentingUiState.WaitingForCard
+            else -> {
+                if (operationMovedPastCardReading) {
+                    CardPresentingUiState.Processing
+                } else {
+                    CardPresentingUiState.WaitingForCard
+                }
+            }
         }
     }
 
