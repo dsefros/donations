@@ -32,6 +32,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -480,32 +481,50 @@ private fun DonationCarouselPanel(
     onPayment: (BigDecimal) -> Unit
 ) {
     val pages = remember(settings) {
-        listOf(
-            DonationCarouselItem(
-                title = "СВОЯ СУММА",
-                description = "Введите любую сумму",
-                amountText = null,
-                actionLabel = "ВНЕСТИ ЛЕПТУ",
-                type = DonationCardType.Custom
-            ),
-            DonationCarouselItem(
-                title = "ПОМОЩЬ ХРАМУ",
-                description = "Нужды церкви",
-                amountText = formatAmountGroups(settings.templeAmount) + " ₽",
-                actionLabel = "ПОЖЕРТВОВАТЬ",
-                type = DonationCardType.Temple
-            ),
-            DonationCarouselItem(
-                title = "ДЕТСКИЙ ПРИЮТ",
-                description = "Забота о сиротах и детях",
-                amountText = formatAmountGroups(settings.orphanageAmount) + " ₽",
-                actionLabel = "ПОЖЕРТВОВАТЬ",
-                type = DonationCardType.Orphanage
-            )
-        )
+        buildList {
+            if (settings.customAmountEnabled) {
+                add(
+                    DonationCarouselItem(
+                        title = "СВОЯ СУММА",
+                        description = "Введите любую сумму",
+                        amountText = null,
+                        actionLabel = "ВНЕСТИ ЛЕПТУ",
+                        type = DonationCardType.Custom
+                    )
+                )
+            }
+            if (settings.templeAmountEnabled) {
+                add(
+                    DonationCarouselItem(
+                        title = "ПОМОЩЬ ХРАМУ",
+                        description = "Нужды церкви",
+                        amountText = formatAmountGroups(settings.templeAmount) + " ₽",
+                        actionLabel = "ПОЖЕРТВОВАТЬ",
+                        type = DonationCardType.Temple
+                    )
+                )
+            }
+            if (settings.orphanageAmountEnabled) {
+                add(
+                    DonationCarouselItem(
+                        title = "ДЕТСКИЙ ПРИЮТ",
+                        description = "Забота о сиротах и детях",
+                        amountText = formatAmountGroups(settings.orphanageAmount) + " ₽",
+                        actionLabel = "ПОЖЕРТВОВАТЬ",
+                        type = DonationCardType.Orphanage
+                    )
+                )
+            }
+        }
     }
 
     val pagerState = rememberPagerState(pageCount = { pages.size })
+
+    LaunchedEffect(pages.size) {
+        if (pages.isNotEmpty() && pagerState.currentPage >= pages.size) {
+            pagerState.scrollToPage(pages.lastIndex)
+        }
+    }
 
     LaunchedEffect(pagerState, paymentInProgress, pages.size) {
         while (true) {
@@ -1102,6 +1121,9 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
     val custom = remember { mutableStateOf(settings.customDefaultAmount) }
     val temple = remember { mutableStateOf(settings.templeAmount) }
     val orphan = remember { mutableStateOf(settings.orphanageAmount) }
+    val customEnabled = remember { mutableStateOf(settings.customAmountEnabled) }
+    val templeEnabled = remember { mutableStateOf(settings.templeAmountEnabled) }
+    val orphanEnabled = remember { mutableStateOf(settings.orphanageAmountEnabled) }
     val error = remember { mutableStateOf<String?>(null) }
     Box(
         modifier = Modifier
@@ -1131,8 +1153,23 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
             Text("НАСТРОЙКИ", style = TextStyle(fontFamily = CormorantFontFamily, fontSize = 20.sp, color = GoldDark), modifier = Modifier.align(Alignment.CenterHorizontally))
             Spacer(modifier = Modifier.height(10.dp))
             SettingsAmountField("Своя сумма по умолчанию", custom.value) { custom.value = normalizeAmountInput(it) }
+            SettingsCardToggle(
+                checked = customEnabled.value,
+                label = "Показывать плашку «Своя сумма»",
+                onCheckedChange = { customEnabled.value = it }
+            )
             SettingsAmountField("Помощь храму", temple.value) { temple.value = normalizeAmountInput(it) }
+            SettingsCardToggle(
+                checked = templeEnabled.value,
+                label = "Показывать плашку «Помощь храму»",
+                onCheckedChange = { templeEnabled.value = it }
+            )
             SettingsAmountField("Детский приют", orphan.value) { orphan.value = normalizeAmountInput(it) }
+            SettingsCardToggle(
+                checked = orphanEnabled.value,
+                label = "Показывать плашку «Детский приют»",
+                onCheckedChange = { orphanEnabled.value = it }
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Spacer(modifier = Modifier.height(8.dp))
             error.value?.let { Text(it, color = Color.Red, fontSize = 13.sp) }
@@ -1146,10 +1183,25 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
                     val c = normalizeAmountInput(custom.value)
                     val t = normalizeAmountInput(temple.value)
                     val o = normalizeAmountInput(orphan.value)
+                    val anyCardEnabled = customEnabled.value || templeEnabled.value || orphanEnabled.value
+                    if (!anyCardEnabled) {
+                        error.value = "Включите хотя бы одну плашку"
+                        return@clickable
+                    }
                     if (parseDonationAmount(c) == null || parseDonationAmount(t) == null || parseDonationAmount(o) == null) {
                         error.value = "Суммы должны быть больше 0"
                     } else {
-                        onSave(DonationSettings(c, t, o)); onDismiss()
+                        onSave(
+                            DonationSettings(
+                                customDefaultAmount = c,
+                                templeAmount = t,
+                                orphanageAmount = o,
+                                customAmountEnabled = customEnabled.value,
+                                templeAmountEnabled = templeEnabled.value,
+                                orphanageAmountEnabled = orphanEnabled.value
+                            )
+                        )
+                        onDismiss()
                     }
                 }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
@@ -1167,6 +1219,31 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsCardToggle(
+    checked: Boolean,
+    label: String,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
+        Text(
+            text = label,
+            style = TextStyle(
+                fontFamily = AlegreyaFontFamily,
+                color = TextMain,
+                fontSize = 14.sp
+            )
+        )
     }
 }
 
