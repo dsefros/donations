@@ -217,6 +217,18 @@ class MainActivity : ComponentActivity() {
 
     private fun handlePaymentResult(result: ActivityResult) {
         paymentInProgress.value = false
+
+        val cancelledByUser = result.data?.getBooleanExtra(
+            CardPresentingActivity.EXTRA_CANCELLED_BY_USER,
+            false
+        ) == true
+
+        if (cancelledByUser) {
+            customAmount.value = donationSettings.value.customDefaultAmount
+            paymentResult.value = null
+            return
+        }
+
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
             paymentResult.value = AppPaymentResult.Error
             customAmount.value = donationSettings.value.customDefaultAmount
