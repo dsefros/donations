@@ -7,15 +7,10 @@ Android POS-приложение на Jetpack Compose для приёма пож
 - JDK 17
 - Android SDK Platform 34
 - Локальная платежная библиотека `SmartSkyPosLib_v1.9.17.aar`
-- Аудио-ресурсы:
-  - `app/src/main/res/raw/main_loop.mp3`
-  - `app/src/main/res/raw/payment_result.mp3`
-
 ## Подготовка
 
 1. Положите AAR вручную в:
    - `app/libs/SmartSkyPosLib_v1.9.17.aar`
-2. Убедитесь, что оба mp3-файла присутствуют в `app/src/main/res/raw/`.
 
 ## Сборка
 

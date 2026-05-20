@@ -32,8 +32,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +59,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.orthodox.charity.audio.AppAudioController
 import com.orthodox.charity.payment.AppPaymentResult
 import com.orthodox.charity.payment.CardPresentingActivity
 import com.orthodox.charity.settings.AppSettingsStorage
@@ -120,7 +117,6 @@ private val CormorantFontFamily = FontFamily(
 
 class MainActivity : ComponentActivity() {
     private val paymentGateway: PaymentGateway = SkyTechPaymentGateway()
-    private val audioController = AppAudioController()
     private val paymentResult = mutableStateOf<AppPaymentResult?>(null)
     private lateinit var settingsStorage: AppSettingsStorage
     private val donationSettings = mutableStateOf(DonationSettings())
@@ -143,14 +139,6 @@ class MainActivity : ComponentActivity() {
         donationSettings.value = settingsStorage.load()
         customAmount.value = donationSettings.value.customDefaultAmount
 
-        audioController.prepareMainLoop(this)
-        audioController.updateSettings(
-            mainLoopEnabled = donationSettings.value.mainLoopSoundEnabled,
-            paymentResultEnabled = donationSettings.value.paymentResultSoundEnabled,
-            mainLoopVolume = donationSettings.value.mainLoopVolume,
-            paymentResultVolume = donationSettings.value.paymentResultVolume
-        )
-
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
             WindowManager.LayoutParams.FLAG_FULLSCREEN or WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
@@ -165,7 +153,6 @@ class MainActivity : ComponentActivity() {
                 onPayment = { amount ->
                     if (paymentInProgress.value) return@OrthodoxCharityApp
                     paymentInProgress.value = true
-                    audioController.pauseMainLoop()
                     posLauncher.launch(CardPresentingActivity.createIntent(this@MainActivity, amount))
                 },
                 customAmountValue = customAmount.value,
@@ -193,33 +180,13 @@ class MainActivity : ComponentActivity() {
                     donationSettings.value = newSettings
                     settingsStorage.save(newSettings)
                     customAmount.value = newSettings.customDefaultAmount
-                    audioController.updateSettings(
-                        mainLoopEnabled = newSettings.mainLoopSoundEnabled,
-                        paymentResultEnabled = newSettings.paymentResultSoundEnabled,
-                        mainLoopVolume = newSettings.mainLoopVolume,
-                        paymentResultVolume = newSettings.paymentResultVolume
-                    )
-                    audioController.startMainLoop()
                 }
             )
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        audioController.startMainLoop()
-    }
-
     override fun onPause() {
-        audioController.pauseMainLoop()
-        audioController.pausePaymentResult()
         super.onPause()
-    }
-
-    override fun onDestroy() {
-        audioController.release()
-        super.onDestroy()
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -250,12 +217,10 @@ class MainActivity : ComponentActivity() {
         if (result.resultCode != Activity.RESULT_OK || result.data == null) {
             paymentResult.value = AppPaymentResult.Error
             customAmount.value = donationSettings.value.customDefaultAmount
-            audioController.playPaymentResult(this, restartMainLoopAfterCompletion = true)
             return
         }
         paymentResult.value = paymentGateway.mapTransactionResult(result.data)
         customAmount.value = donationSettings.value.customDefaultAmount
-        audioController.playPaymentResult(this, restartMainLoopAfterCompletion = true)
     }
 }
 
@@ -1137,10 +1102,6 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
     val custom = remember { mutableStateOf(settings.customDefaultAmount) }
     val temple = remember { mutableStateOf(settings.templeAmount) }
     val orphan = remember { mutableStateOf(settings.orphanageAmount) }
-    val mainEnabled = remember { mutableStateOf(settings.mainLoopSoundEnabled) }
-    val payEnabled = remember { mutableStateOf(settings.paymentResultSoundEnabled) }
-    val mainVol = remember { mutableStateOf(settings.mainLoopVolume) }
-    val payVol = remember { mutableStateOf(settings.paymentResultVolume) }
     val error = remember { mutableStateOf<String?>(null) }
     Box(
         modifier = Modifier
@@ -1173,13 +1134,6 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
             SettingsAmountField("Помощь храму", temple.value) { temple.value = normalizeAmountInput(it) }
             SettingsAmountField("Детский приют", orphan.value) { orphan.value = normalizeAmountInput(it) }
             Spacer(modifier = Modifier.height(4.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) { Text("Фоновый звук", modifier = Modifier.weight(1f)); Switch(checked = mainEnabled.value, onCheckedChange = { mainEnabled.value = it }) }
-            Text("Громкость фонового звука: ${(mainVol.value * 100).toInt()}%")
-            Slider(value = mainVol.value, onValueChange = { mainVol.value = it }, valueRange = 0f..1f)
-            Spacer(modifier = Modifier.height(6.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) { Text("Звук результата оплаты", modifier = Modifier.weight(1f)); Switch(checked = payEnabled.value, onCheckedChange = { payEnabled.value = it }) }
-            Text("Громкость результата оплаты: ${(payVol.value * 100).toInt()}%")
-            Slider(value = payVol.value, onValueChange = { payVol.value = it }, valueRange = 0f..1f)
             Spacer(modifier = Modifier.height(8.dp))
             error.value?.let { Text(it, color = Color.Red, fontSize = 13.sp) }
             Spacer(modifier = Modifier.height(10.dp))
@@ -1195,7 +1149,7 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
                     if (parseDonationAmount(c) == null || parseDonationAmount(t) == null || parseDonationAmount(o) == null) {
                         error.value = "Суммы должны быть больше 0"
                     } else {
-                        onSave(DonationSettings(c, t, o, mainEnabled.value, payEnabled.value, mainVol.value, payVol.value)); onDismiss()
+                        onSave(DonationSettings(c, t, o)); onDismiss()
                     }
                 }
                         .padding(horizontal = 14.dp, vertical = 8.dp)
