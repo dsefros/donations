@@ -117,6 +117,7 @@ class CardPresentingActivity : ComponentActivity() {
     private val uiState = mutableStateOf(CardPresentingUiState.Preparing)
     private var paymentStarted = false
     private var paymentCompleted = false
+    private var cancelledByUser = false
     private var paymentJob: Job? = null
     private var headlessClient: SmartSkyPosHeadlessClient? = null
 
@@ -182,6 +183,10 @@ class CardPresentingActivity : ComponentActivity() {
                     }
                 )
 
+                if (cancelledByUser || isFinishing || isDestroyed) {
+                    return@launch
+                }
+
                 uiState.value = CardPresentingUiState.ReturningResult
                 paymentCompleted = true
                 setResult(Activity.RESULT_OK, Intent().putExtra(PaymentActivity.RESULT_KEY, result))
@@ -220,8 +225,9 @@ class CardPresentingActivity : ComponentActivity() {
     }
 
     private fun cancelPaymentByUser() {
-        if (paymentCompleted || isFinishing || isDestroyed) return
+        if (paymentCompleted || cancelledByUser || isFinishing || isDestroyed) return
 
+        cancelledByUser = true
         paymentCompleted = true
 
         headlessClient?.cancelCardReading()
@@ -271,6 +277,9 @@ private fun CardPresentingScreen(
     uiState: CardPresentingUiState,
     onCancel: () -> Unit
 ) {
+    val cancelVisible = uiState != CardPresentingUiState.Processing &&
+        uiState != CardPresentingUiState.ReturningResult
+
     val bottomText = when (uiState) {
         CardPresentingUiState.Preparing -> "Подготовка оплаты"
         CardPresentingUiState.WaitingForCard -> "Приложите карту"
@@ -319,36 +328,38 @@ private fun CardPresentingScreen(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = 14.dp, end = 14.dp)
-                .size(42.dp)
-                .clip(RoundedCornerShape(50))
-                .background(Color.White.copy(alpha = 0.74f))
-                .border(
-                    BorderStroke(1.dp, Color(0xFFD0B98C).copy(alpha = 0.75f)),
-                    RoundedCornerShape(50)
+        if (cancelVisible) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 14.dp, end = 14.dp)
+                    .size(42.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Color.White.copy(alpha = 0.74f))
+                    .border(
+                        BorderStroke(1.dp, Color(0xFFD0B98C).copy(alpha = 0.75f)),
+                        RoundedCornerShape(50)
+                    )
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        onCancel()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "×",
+                    style = TextStyle(
+                        fontFamily = AlegreyaFontFamily,
+                        fontSize = 30.sp,
+                        lineHeight = 30.sp,
+                        color = GoldDark,
+                        fontWeight = FontWeight.SemiBold,
+                        textAlign = TextAlign.Center
+                    )
                 )
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    onCancel()
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "×",
-                style = TextStyle(
-                    fontFamily = AlegreyaFontFamily,
-                    fontSize = 30.sp,
-                    lineHeight = 30.sp,
-                    color = GoldDark,
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.Center
-                )
-            )
+            }
         }
     }
 }
