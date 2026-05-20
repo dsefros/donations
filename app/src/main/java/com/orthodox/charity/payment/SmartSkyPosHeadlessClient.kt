@@ -12,9 +12,11 @@ import com.skytech.smartskyposlib.TransactionCallback
 import com.skytech.smartskyposlib.TransactionParams
 import com.skytech.smartskyposlib.TransactionResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -35,7 +37,14 @@ class SmartSkyPosHeadlessClient(context: Context) {
         onOperationNameChanged: (String?) -> Unit = {},
         onQrReading: (String?) -> Unit = {}
     ): TransactionResult {
-        val pos = ensureConnected(onStateChanged)
+        val pos = try {
+            withTimeout(BIND_TIMEOUT_MS) {
+                ensureConnected(onStateChanged)
+            }
+        } catch (t: TimeoutCancellationException) {
+            throw SmartSkyPosHeadlessException("SmartSkyPos service bind timeout", t)
+        }
+
         waitUntilReady(pos)
 
         val transactionCallback = object : TransactionCallback.Stub() {
@@ -56,7 +65,9 @@ class SmartSkyPosHeadlessClient(context: Context) {
 
         return withContext(Dispatchers.IO) {
             try {
-                pos.payment(params, transactionCallback)
+                withTimeout(PAYMENT_TIMEOUT_MS) {
+                    pos.payment(params, transactionCallback)
+                }
             } catch (t: Throwable) {
                 throw SmartSkyPosHeadlessException("SmartSkyPos headless payment call failed", t)
             }
@@ -102,8 +113,8 @@ class SmartSkyPosHeadlessClient(context: Context) {
         smartSkyPos?.let { return it }
 
         return suspendCancellableCoroutine { cont ->
-            val intent = Intent("com.skytech.smartskypos.ISmartSkyPos").apply {
-                setPackage("com.skytech.smartskypos")
+            val intent = Intent(SERVICE_ACTION).apply {
+                setPackage(SERVICE_PACKAGE)
             }
 
             val connection = object : ServiceConnection {
@@ -112,9 +123,11 @@ class SmartSkyPosHeadlessClient(context: Context) {
                     smartSkyPos = pos
                     if (pos != null) {
                         try {
+                            stateEventHandler = onStateChanged
                             pos.registerStateCallback(stateCallback)
                             stateCallbackRegistered = true
                         } catch (t: Throwable) {
+                            close()
                             if (cont.isActive) {
                                 cont.resumeWithException(
                                     SmartSkyPosHeadlessException("Unable to register SmartSkyPos state callback", t)
@@ -122,7 +135,6 @@ class SmartSkyPosHeadlessClient(context: Context) {
                             }
                             return
                         }
-                        stateEventHandler = onStateChanged
                         if (cont.isActive) cont.resume(pos)
                     } else if (cont.isActive) {
                         cont.resumeWithException(
@@ -163,10 +175,10 @@ class SmartSkyPosHeadlessClient(context: Context) {
             if (state == State.READY.code || state == State.UNFINISHED_OPERATION.code) {
                 return@withContext
             }
-            if (System.currentTimeMillis() - startTime >= 30_000L) {
+            if (System.currentTimeMillis() - startTime >= READY_TIMEOUT_MS) {
                 throw SmartSkyPosHeadlessException("SmartSkyPos state wait timeout")
             }
-            delay(50L)
+            delay(STATE_POLL_DELAY_MS)
         }
     }
 
@@ -177,5 +189,14 @@ class SmartSkyPosHeadlessClient(context: Context) {
         override fun onStateChanged(state: Int, message: String?) {
             stateEventHandler(state, message)
         }
+    }
+
+    private companion object {
+        const val SERVICE_ACTION = "com.skytech.smartskypos.ISmartSkyPos"
+        const val SERVICE_PACKAGE = "com.skytech.smartskypos"
+        const val BIND_TIMEOUT_MS = 15_000L
+        const val READY_TIMEOUT_MS = 30_000L
+        const val PAYMENT_TIMEOUT_MS = 180_000L
+        const val STATE_POLL_DELAY_MS = 50L
     }
 }

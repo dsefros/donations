@@ -46,6 +46,7 @@ import com.orthodox.charity.R
 import com.skytech.smartskyposlib.State
 import com.skytech.smartskyposlib.TransactionParams
 import com.skytech.smartskyposlib.ui.PaymentActivity
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -174,8 +175,10 @@ class CardPresentingActivity : ComponentActivity() {
                 paymentCompleted = true
                 setResult(Activity.RESULT_OK, Intent().putExtra(PaymentActivity.RESULT_KEY, result))
                 if (!isFinishing) finish()
+            } catch (t: CancellationException) {
+                throw t
             } catch (t: Throwable) {
-                Log.e(TAG, "Headless SmartSky payment failed", t)
+                Log.e(TAG, "Headless SmartSky payment failed: ${t.javaClass.simpleName}")
                 setResult(Activity.RESULT_CANCELED)
                 if (!isFinishing) finish()
             } finally {
@@ -208,6 +211,7 @@ class CardPresentingActivity : ComponentActivity() {
 
     override fun onDestroy() {
         paymentJob?.cancel()
+        paymentJob = null
         if (!paymentCompleted) {
             headlessClient?.cancelCardReading()
         }
