@@ -1115,12 +1115,12 @@ fun SettingsDialog(settings: DonationSettings, onSave: (DonationSettings) -> Uni
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 360.dp)
+                .widthIn(max = 416.dp)
                 .fillMaxWidth()
                 .padding(12.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(20.dp))
                 .background(Color.White)
-                .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(12.dp))
+                .border(BorderStroke(1.dp, BorderGold), RoundedCornerShape(20.dp))
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
